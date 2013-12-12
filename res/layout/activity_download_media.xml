@@ -17,7 +17,7 @@
             android:layout_gravity="center"
             android:text="@string/scan_media_download_via_pc_button" />
     </LinearLayout>
-
+    
     <ListView
         android:id="@+id/missing_media_list"
         android:layout_width="fill_parent"
