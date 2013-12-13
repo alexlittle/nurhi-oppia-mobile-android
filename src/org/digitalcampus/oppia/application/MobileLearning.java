@@ -59,6 +59,7 @@ public class MobileLearning extends Application {
 	public static final String SERVER_COURSES_NAME = "courses";
 	
 	// general other settings
+	public static final boolean DEVELOPER_MODE = true;
 	public static final String BUGSENSE_API_KEY = "84d61fd0";
 	public static final int PASSWORD_MIN_LENGTH = 6;
 	public static final int PAGE_READ_TIME = 3;
@@ -68,7 +69,6 @@ public class MobileLearning extends Application {
 	public static final DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("yyyy-MM-dd");
 	public static final DateTimeFormatter TIME_FORMAT = DateTimeFormat.forPattern("HH:mm:ss");
 	public static final int MAX_TRACKER_SUBMIT = 10;
-	public static final boolean DEVELOPER_MODE = false;
 	
 	// only used in case a course doesn't have any lang specified
 	public static final String DEFAULT_LANG = "en";

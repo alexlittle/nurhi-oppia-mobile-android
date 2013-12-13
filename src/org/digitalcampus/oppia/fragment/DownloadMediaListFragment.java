@@ -16,17 +16,37 @@
  */
 package org.digitalcampus.oppia.fragment;
 
-import android.os.Bundle;
-import android.support.v4.app.ListFragment;
+import java.util.ArrayList;
 
-public class DownloadMediaListFragment extends ListFragment {
+import org.digitalcampus.oppia.activity.DownloadMediaActivity;
+import org.digitalcampus.oppia.adapter.DownloadMediaListAdapter;
+import org.digitalcampus.oppia.model.Media;
+
+import android.os.Bundle;
+
+import com.actionbarsherlock.app.SherlockListFragment;
+
+public class DownloadMediaListFragment extends SherlockListFragment {
 
 	public final static String TAG = DownloadMediaListFragment.class.getSimpleName();
+	private ArrayList<Media> mediaList;
+	private DownloadMediaListAdapter dmla;
 
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		// Retain this fragment across configuration changes.
+		setRetainInstance(true);
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	public void onActivityCreated(Bundle savedState) {
 		super.onActivityCreated(savedState);
-
+		Bundle bundle = this.getArguments();
+		mediaList = (ArrayList<Media>) bundle.getSerializable(DownloadMediaActivity.TAG);
+		dmla = new DownloadMediaListAdapter((DownloadMediaActivity) getActivity(), mediaList);
+		setListAdapter(dmla);
 	}
 
 }
