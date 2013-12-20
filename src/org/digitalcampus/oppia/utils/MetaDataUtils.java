@@ -18,9 +18,9 @@ package org.digitalcampus.oppia.utils;
 
 import java.util.Iterator;
 
-import org.digitalcampus.mobile.learning.R;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.nurhi.oppia.R;
 
 import android.content.Context;
 import android.content.Intent;

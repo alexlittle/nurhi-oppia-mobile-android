@@ -18,9 +18,9 @@
 package org.digitalcampus.oppia.adapter;
 
 import java.util.ArrayList;
-
-import org.digitalcampus.mobile.learning.R;
+ 
 import org.digitalcampus.oppia.model.Points;
+import org.nurhi.oppia.R;
 
 import android.app.Activity;
 import android.content.Context;

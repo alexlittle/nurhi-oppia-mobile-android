@@ -18,9 +18,9 @@ package org.digitalcampus.oppia.activity;
 
 import java.util.Locale;
 
-import org.digitalcampus.mobile.learning.R;
 import org.digitalcampus.oppia.utils.ConnectionUtils;
 import org.digitalcampus.oppia.utils.FileUtils;
+import org.nurhi.oppia.R;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;

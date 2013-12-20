@@ -20,10 +20,10 @@ package org.digitalcampus.oppia.adapter;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import org.digitalcampus.mobile.learning.R;
 import org.digitalcampus.oppia.activity.CourseActivity;
 import org.digitalcampus.oppia.model.Course;
 import org.digitalcampus.oppia.model.Section;
+import org.nurhi.oppia.R;
 
 import android.app.Activity;
 import android.content.Context;

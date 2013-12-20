@@ -20,7 +20,6 @@ package org.digitalcampus.oppia.adapter;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import org.digitalcampus.mobile.learning.R;
 import org.digitalcampus.oppia.activity.DownloadActivity;
 import org.digitalcampus.oppia.listener.InstallCourseListener;
 import org.digitalcampus.oppia.listener.UpdateScheduleListener;
@@ -30,6 +29,7 @@ import org.digitalcampus.oppia.task.DownloadCourseTask;
 import org.digitalcampus.oppia.task.InstallDownloadedCoursesTask;
 import org.digitalcampus.oppia.task.Payload;
 import org.digitalcampus.oppia.task.ScheduleUpdateTask;
+import org.nurhi.oppia.R;
 
 import android.app.Activity;
 import android.app.ProgressDialog;

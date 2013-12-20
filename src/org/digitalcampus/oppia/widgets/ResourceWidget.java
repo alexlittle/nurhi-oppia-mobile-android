@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Locale;
 
-import org.digitalcampus.mobile.learning.R;
 import org.digitalcampus.oppia.activity.CourseActivity;
 import org.digitalcampus.oppia.application.Tracker;
 import org.digitalcampus.oppia.listener.OnResourceClickListener;
@@ -13,6 +12,7 @@ import org.digitalcampus.oppia.model.Course;
 import org.digitalcampus.oppia.utils.MetaDataUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.nurhi.oppia.R;
 
 import android.content.Context;
 import android.graphics.Bitmap;

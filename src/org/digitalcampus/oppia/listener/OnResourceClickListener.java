@@ -20,7 +20,7 @@ package org.digitalcampus.oppia.listener;
 import java.io.File;
 import java.util.List;
 
-import org.digitalcampus.mobile.learning.R;
+import org.nurhi.oppia.R;
 
 import android.content.Context;
 import android.content.Intent;

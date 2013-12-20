@@ -19,11 +19,11 @@ package org.digitalcampus.oppia.application;
 
 import java.io.File;
 
-import org.digitalcampus.mobile.learning.R;
 import org.digitalcampus.oppia.task.SubmitQuizTask;
 import org.digitalcampus.oppia.task.SubmitTrackerMultipleTask;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.nurhi.oppia.R;
 
 import android.app.Activity;
 import android.app.Application;
@@ -37,7 +37,7 @@ public class MobileLearning extends Application {
 
 	// local storage vars
 	public static final String OPPIAMOBILE_ROOT = Environment
-			.getExternalStorageDirectory() + "/digitalcampus/";
+			.getExternalStorageDirectory() + "/nurhi/";
 	public static final String COURSES_PATH = OPPIAMOBILE_ROOT + "modules/";
 	public static final String MEDIA_PATH = OPPIAMOBILE_ROOT + "media/";
 	public static final String DOWNLOAD_PATH = OPPIAMOBILE_ROOT + "download/";

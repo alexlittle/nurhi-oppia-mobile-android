@@ -2,7 +2,6 @@ package org.digitalcampus.oppia.adapter;
 
 import java.util.ArrayList;
 
-import org.digitalcampus.mobile.learning.R;
 import org.digitalcampus.oppia.listener.DownloadMediaListener;
 import org.digitalcampus.oppia.model.DownloadProgress;
 import org.digitalcampus.oppia.model.Media;
@@ -10,6 +9,7 @@ import org.digitalcampus.oppia.task.DownloadMediaTask;
 import org.digitalcampus.oppia.task.Payload;
 import org.digitalcampus.oppia.utils.ConnectionUtils;
 import org.digitalcampus.oppia.utils.UIUtils;
+import org.nurhi.oppia.R;
 
 import android.app.Activity;
 import android.app.ProgressDialog;

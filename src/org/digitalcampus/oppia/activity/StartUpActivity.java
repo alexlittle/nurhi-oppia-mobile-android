@@ -21,7 +21,6 @@ package org.digitalcampus.oppia.activity;
 import java.io.File;
 import java.util.ArrayList;
 
-import org.digitalcampus.mobile.learning.R;
 import org.digitalcampus.oppia.application.MobileLearning;
 import org.digitalcampus.oppia.listener.InstallCourseListener;
 import org.digitalcampus.oppia.listener.PostInstallListener;
@@ -31,6 +30,7 @@ import org.digitalcampus.oppia.task.InstallDownloadedCoursesTask;
 import org.digitalcampus.oppia.task.Payload;
 import org.digitalcampus.oppia.task.PostInstallTask;
 import org.digitalcampus.oppia.task.UpgradeManagerTask;
+import org.nurhi.oppia.R;
 
 import com.bugsense.trace.BugSenseHandler;
 

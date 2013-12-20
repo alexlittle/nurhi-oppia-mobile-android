@@ -22,7 +22,7 @@ import java.io.InputStream;
 import java.util.Locale;
 import java.util.concurrent.Callable;
 
-import org.digitalcampus.mobile.learning.R;
+import org.nurhi.oppia.R;
 
 import android.app.Activity;
 import android.content.Context;

@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Vector;
 
-import org.digitalcampus.mobile.learning.R;
 import org.digitalcampus.oppia.adapter.ActivityPagerAdapter;
 import org.digitalcampus.oppia.adapter.SectionListAdapter;
 import org.digitalcampus.oppia.model.Activity;
@@ -34,6 +33,7 @@ import org.digitalcampus.oppia.widgets.PageWidget;
 import org.digitalcampus.oppia.widgets.QuizWidget;
 import org.digitalcampus.oppia.widgets.ResourceWidget;
 import org.digitalcampus.oppia.widgets.WidgetFactory;
+import org.nurhi.oppia.R;
 
 import android.content.Intent;
 import android.content.SharedPreferences;

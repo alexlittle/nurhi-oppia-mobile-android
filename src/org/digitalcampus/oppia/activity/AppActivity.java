@@ -18,9 +18,8 @@
 package org.digitalcampus.oppia.activity;
 
 import java.util.ArrayList;
-
-import org.digitalcampus.mobile.learning.R;
 import org.digitalcampus.oppia.application.ScheduleReminders;
+import org.nurhi.oppia.R;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.MenuItem;

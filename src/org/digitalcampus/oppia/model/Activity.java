@@ -21,12 +21,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.digitalcampus.mobile.learning.R;
 import org.digitalcampus.oppia.utils.ImageUtils;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.nurhi.oppia.R;
 
 import android.content.res.Resources;
 import android.graphics.drawable.BitmapDrawable;

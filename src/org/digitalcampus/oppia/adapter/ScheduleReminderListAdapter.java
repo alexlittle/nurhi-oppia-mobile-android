@@ -20,9 +20,9 @@ package org.digitalcampus.oppia.adapter;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import org.digitalcampus.mobile.learning.R;
 import org.digitalcampus.oppia.application.DbHelper;
 import org.digitalcampus.oppia.model.Course;
+import org.nurhi.oppia.R;
 
 import android.content.Context;
 import android.content.SharedPreferences;
