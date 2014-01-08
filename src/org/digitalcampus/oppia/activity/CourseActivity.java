@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Vector;
+import java.util.concurrent.Callable;
 
 import org.digitalcampus.oppia.adapter.ActivityPagerAdapter;
 import org.digitalcampus.oppia.adapter.SectionListAdapter;
@@ -29,6 +29,7 @@ import org.digitalcampus.oppia.model.Activity;
 import org.digitalcampus.oppia.model.Course;
 import org.digitalcampus.oppia.model.Section;
 import org.digitalcampus.oppia.utils.ImageUtils;
+import org.digitalcampus.oppia.utils.UIUtils;
 import org.digitalcampus.oppia.widgets.PageWidget;
 import org.digitalcampus.oppia.widgets.QuizWidget;
 import org.digitalcampus.oppia.widgets.ResourceWidget;
@@ -62,7 +63,6 @@ public class CourseActivity extends SherlockFragmentActivity implements ActionBa
 	private Section section;
 	private Course course;
 	private int currentActivityNo = 0;
-	private WidgetFactory currentActivity;
 	private SharedPreferences prefs;
 	private ArrayList<Activity> activities;
 	private boolean isBaseline = false;
@@ -71,8 +71,6 @@ public class CourseActivity extends SherlockFragmentActivity implements ActionBa
 	private static int TTS_CHECK = 0;
 	private static TextToSpeech myTTS;
 	private boolean ttsRunning = false;
-
-	private HashMap<String, Object> widgetState = new HashMap<String, Object>();
 
 	private ViewPager viewPager;
 	private ActivityPagerAdapter apAdapter;
@@ -103,73 +101,11 @@ public class CourseActivity extends SherlockFragmentActivity implements ActionBa
 			actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 			actionBar.setDisplayHomeAsUpEnabled(true);
 			actionBar.setHomeButtonEnabled(true);
-			List<Fragment> fragments = new Vector<Fragment>();
-			for (Activity activity : activities) {
-				if (activity.getActType().equalsIgnoreCase("page")){
-					Fragment f = PageWidget.newInstance(activity, course, isBaseline);
-					fragments.add(f);
-				} else if (activity.getActType().equalsIgnoreCase("quiz")) {
-					Fragment f = QuizWidget.newInstance(activity, course, isBaseline);
-					fragments.add(f);
-				} else if (activity.getActType().equalsIgnoreCase("resource")) {
-					Fragment f = ResourceWidget.newInstance(activity, course, isBaseline);
-					fragments.add(f);
-				}
-			}
-			apAdapter = new ActivityPagerAdapter(getSupportFragmentManager(), fragments);
-			viewPager.setAdapter(apAdapter);
-
-			for (int i = 0; i < activities.size(); i++) {
-				String title = activities.get(i).getTitle(
-						prefs.getString(getString(R.string.prefs_language), Locale.getDefault().getLanguage()));
-				boolean tabSelected = false;
-				if (i == currentActivityNo) {
-					tabSelected = true;
-				}
-				actionBar.addTab(actionBar.newTab().setText(title).setTabListener(this), tabSelected);
-
-			}
-			viewPager.setCurrentItem(currentActivityNo);
-			viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-
-				public void onPageScrollStateChanged(int arg0) {
-					// TODO Auto-generated method stub
-				}
-
-				public void onPageScrolled(int arg0, float arg1, int arg2) {
-					// TODO Auto-generated method stub
-				}
-
-				public void onPageSelected(int arg0) {
-					actionBar.setSelectedNavigationItem(arg0);
-				}
-
-			});
+			
 		}
+		
 	}
-
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		// Serialize the current tab position.
-		// outState.putInt(STATE_SELECTED_NAVIGATION_ITEM,
-		// getActionBar().getSelectedNavigationIndex());
-		// outState.putSerializable("widget_config",
-		// currentActivity.getWidgetConfig());
-		super.onSaveInstanceState(outState);
-	}
-
-	@Override
-	public void onRestoreInstanceState(Bundle savedInstanceState) {
-		// Restore the previously serialized current tab position.
-		// if (savedInstanceState.containsKey(STATE_SELECTED_NAVIGATION_ITEM)) {
-		// getActionBar().setSelectedNavigationItem(savedInstanceState.getInt(STATE_SELECTED_NAVIGATION_ITEM));
-		// }
-		// savedInstanceState.putSerializable("widget_config",
-		// currentActivity.getWidgetConfig());
-		super.onRestoreInstanceState(savedInstanceState);
-	}
-
+	
 	@Override
 	public void onStart() {
 		super.onStart();
@@ -179,9 +115,66 @@ public class CourseActivity extends SherlockFragmentActivity implements ActionBa
 			setTitle(actionBarTitle);
 		} else if (isBaseline) {
 			setTitle(getString(R.string.title_baseline));
+		}	
+		actionBar.removeAllTabs();
+		List<Fragment> fragments = new ArrayList<Fragment>();
+		for (int i = 0; i < activities.size(); i++) {
+			Fragment f = null;
+			if (activities.get(i).getActType().equalsIgnoreCase("page")){
+				f = PageWidget.newInstance(activities.get(i), course, isBaseline);
+				fragments.add(f);
+			} else if (activities.get(i).getActType().equalsIgnoreCase("quiz")) {
+				f = QuizWidget.newInstance(activities.get(i), course, isBaseline);
+				fragments.add(f);
+			} else if (activities.get(i).getActType().equalsIgnoreCase("resource")) {
+				f = ResourceWidget.newInstance(activities.get(i), course, isBaseline);
+				fragments.add(f);
+			}
 		}
+		
+		apAdapter = new ActivityPagerAdapter(getSupportFragmentManager(), fragments);
+		viewPager.setAdapter(apAdapter);
+
+		for (int i = 0; i < activities.size(); i++) {
+			String title = activities.get(i).getTitle(
+					prefs.getString(getString(R.string.prefs_language), Locale.getDefault().getLanguage()));
+			boolean tabSelected = false;
+			if (i == currentActivityNo) {
+				tabSelected = true;
+			}
+			actionBar.addTab(actionBar.newTab().setText(title).setTabListener(this), tabSelected);
+
+		}
+		viewPager.setCurrentItem(currentActivityNo);
+		viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+
+			public void onPageScrollStateChanged(int arg0) {
+				// do nothing
+			}
+
+			public void onPageScrolled(int arg0, float arg1, int arg2) {
+				// do nothing
+			}
+
+			public void onPageSelected(int arg0) {
+				actionBar.setSelectedNavigationItem(arg0);
+			}
+
+		});
 	}
 
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putInt("currentActivityNo", currentActivityNo);
+	}
+
+	@Override
+	public void onRestoreInstanceState(Bundle savedInstanceState) {
+		super.onRestoreInstanceState(savedInstanceState);
+		currentActivityNo = savedInstanceState.getInt("currentActivityNo");
+	}
+	
 	@Override
 	public void onPause() {
 		super.onPause();
@@ -189,9 +182,7 @@ public class CourseActivity extends SherlockFragmentActivity implements ActionBa
 			myTTS.shutdown();
 			myTTS = null;
 		}	
-		if (currentActivity != null) {
-			this.widgetState = currentActivity.getWidgetConfig();
-		}
+		((WidgetFactory) apAdapter.getItem(currentActivityNo)).saveTracker();
 	}	
 	
 	@Override
@@ -200,7 +191,6 @@ public class CourseActivity extends SherlockFragmentActivity implements ActionBa
 			myTTS.shutdown();
 			myTTS = null;
 		}
-		
 		super.onDestroy();
 	}
 	
@@ -220,31 +210,72 @@ public class CourseActivity extends SherlockFragmentActivity implements ActionBa
 		}
 		return super.onPrepareOptionsMenu(menu);
 	}
-
 	
-
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+		case R.id.menu_language:
+			createLanguageDialog();
+			return true;
+		case R.id.menu_help:
+			startActivity(new Intent(this, HelpActivity.class));
+			return true;
+		case android.R.id.home:
+			this.finish();
+			return true;
+		case R.id.menu_tts:
+			if (myTTS == null && !ttsRunning) {
+				// check for TTS data
+				Intent checkTTSIntent = new Intent();
+				checkTTSIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+				startActivityForResult(checkTTSIntent, TTS_CHECK);
+			} else if (myTTS != null && ttsRunning) {
+				this.stopReading();
+			} else {
+				// TTS not installed so show message
+				Toast.makeText(this, this.getString(R.string.error_tts_start), Toast.LENGTH_LONG).show();
+			}
+			supportInvalidateOptionsMenu();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+	
+	private void createLanguageDialog() {
+		UIUtils ui = new UIUtils();
+		ui.createLanguageDialog(this, course.getLangs(), prefs, new Callable<Boolean>() {
+			public Boolean call() throws Exception {
+				CourseActivity.this.onStart();
+				return true;
+			}
+		});
+	}
 
 	public void onTabReselected(Tab tab, FragmentTransaction ft) {
 	}
 
 	public void onTabSelected(Tab tab, FragmentTransaction ft) {
 		viewPager.setCurrentItem(tab.getPosition());
+		this.currentActivityNo = tab.getPosition();
+		this.stopReading();
+		((WidgetFactory) apAdapter.getItem(currentActivityNo)).setStartTime(System.currentTimeMillis()/1000);
 	}
 
 	public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+		((WidgetFactory) apAdapter.getItem(currentActivityNo)).saveTracker();
 	}
 
-	
 	public void onInit(int status) {
 		// check for successful instantiation
 		if (status == TextToSpeech.SUCCESS) {
-			Log.d(TAG, "tts success");
 			ttsRunning = true;
-			currentActivity.setReadAloud(true);
+			((WidgetFactory) apAdapter.getItem(currentActivityNo)).setReadAloud(true);
 			supportInvalidateOptionsMenu();
 			HashMap<String,String> params = new HashMap<String,String>();
 			params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID,TAG);
-			myTTS.speak(currentActivity.getContentToRead(), TextToSpeech.QUEUE_FLUSH, params);
+			myTTS.speak(((WidgetFactory) apAdapter.getItem(currentActivityNo)).getContentToRead(), TextToSpeech.QUEUE_FLUSH, params);
 			myTTS.setOnUtteranceProgressListener(new UtteranceProgressListener() {
 				
                 @Override
@@ -286,7 +317,6 @@ public class CourseActivity extends SherlockFragmentActivity implements ActionBa
 			myTTS = null;
 		}
 		this.ttsRunning = false;
-
 	}
 
 }
