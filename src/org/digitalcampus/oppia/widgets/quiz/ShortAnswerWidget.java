@@ -37,7 +37,6 @@ public class ShortAnswerWidget extends QuestionWidget {
 		init(activity, container ,R.layout.widget_quiz_shortanswer,v);
 	}
 
-
 	@Override
 	public void setQuestionResponses(List<Response> responses, List<String> currentAnswers) {
 		EditText et = (EditText) view.findViewById(R.id.responsetext);
