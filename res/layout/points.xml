@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_margin="4dp"
-        android:background="@drawable/points_background" />
+        android:background="@drawable/points_background"/>
 
     <TextView
         android:id="@+id/userbadges"
