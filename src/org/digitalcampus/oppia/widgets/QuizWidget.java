@@ -18,6 +18,7 @@
 package org.digitalcampus.oppia.widgets;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -32,10 +33,12 @@ import org.digitalcampus.mobile.quiz.model.questiontypes.MultiSelect;
 import org.digitalcampus.mobile.quiz.model.questiontypes.Numerical;
 import org.digitalcampus.mobile.quiz.model.questiontypes.ShortAnswer;
 import org.digitalcampus.oppia.activity.CourseActivity;
+import org.digitalcampus.oppia.adapter.QuizFeedbackAdapter;
 import org.digitalcampus.oppia.application.DbHelper;
 import org.digitalcampus.oppia.application.Tracker;
 import org.digitalcampus.oppia.model.Activity;
 import org.digitalcampus.oppia.model.Course;
+import org.digitalcampus.oppia.model.QuizFeedback;
 import org.digitalcampus.oppia.utils.MetaDataUtils;
 import org.digitalcampus.oppia.widgets.quiz.DescriptionWidget;
 import org.digitalcampus.oppia.widgets.quiz.MatchingWidget;
@@ -57,22 +60,20 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
-import android.widget.TableLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -261,7 +262,7 @@ public class QuizWidget extends WidgetFactory {
 	}
 
 	private void setProgress() {
-		TextView progress = (TextView) getView().findViewById(R.id.mquiz_progress);
+		TextView progress = (TextView) getView().findViewById(R.id.quiz_progress);
 		try {
 			if (quiz.getCurrentQuestion().responseExpected()) {
 				progress.setText(super.getActivity().getString(R.string.widget_quiz_progress, quiz.getCurrentQuestionNo(),
@@ -321,75 +322,83 @@ public class QuizWidget extends WidgetFactory {
 		db.insertQuizResult(data, course.getModId());
 		db.close();
 		Log.d(TAG, data);
-
-		LinearLayout responsesLL = (LinearLayout) getView().findViewById(R.id.quizResponseWidget);
-		responsesLL.removeAllViews();
-		nextBtn.setVisibility(View.GONE);
-		prevBtn.setVisibility(View.GONE);
-		qText.setVisibility(View.GONE);
-		questionImage.setVisibility(View.GONE);
+		
+		// load new layout
+		View C = getView().findViewById(R.id.quiz_progress);
+	    ViewGroup parent = (ViewGroup) C.getParent();
+	    int index = parent.indexOfChild(C);
+	    parent.removeView(C);
+	    C = super.getActivity().getLayoutInflater().inflate(R.layout.widget_quiz_results, parent, false);
+	    parent.addView(C, index);
+		
+		TextView title = (TextView) getView().findViewById(R.id.quiz_results_score);
+		title.setText(super.getActivity().getString(R.string.widget_quiz_results_score, this.getPercent()));
 
 		if (this.isBaseline) {
-			TextView progress = (TextView) getView().findViewById(R.id.mquiz_progress);
-			progress.setText("");
-
-			TextView intro = new TextView(super.getActivity());
-			intro.setText(super.getActivity().getString(R.string.widget_quiz_baseline_completed));
-			intro.setGravity(Gravity.CENTER);
-			intro.setTextSize(20);
-			intro.setPadding(0, 20, 0, 50);
-			responsesLL.addView(intro);
-
-			Button restartBtn = new Button(super.getActivity());
+			TextView baselineExtro = (TextView) getView().findViewById(R.id.quiz_results_baseline);
+			baselineExtro.setVisibility(View.VISIBLE);
+			baselineExtro.setText(super.getActivity().getString(R.string.widget_quiz_baseline_completed));
+		} 
+		
+		// TODO add TextView here to give overall feedback if it's in the quiz
+		
+		// Show the detail of which questions were right/wrong
+		ListView questionFeedbackLV = (ListView) getView().findViewById(R.id.quiz_results_feedback);
+		ArrayList<QuizFeedback> quizFeedback = new ArrayList<QuizFeedback>();
+		List<QuizQuestion> questions = this.quiz.getQuestions();
+		for(QuizQuestion q: questions){
+			if(!(q instanceof Description)){
+				QuizFeedback qf = new QuizFeedback();
+				qf.setScore(q.getScoreAsPercent());
+				qf.setQuestionText(q.getTitle());
+				qf.setUserResponse(q.getUserResponses());
+				qf.setFeedbackText(q.getFeedback());
+				quizFeedback.add(qf);
+			}
+		}
+		QuizFeedbackAdapter qfa = new QuizFeedbackAdapter(super.getActivity(), quizFeedback);
+		questionFeedbackLV.setAdapter(qfa);
+		
+		// Show restart or continue button
+		Button restartBtn = (Button) getView().findViewById(R.id.quiz_results_button);
+		
+		if (this.isBaseline) {
 			restartBtn.setText(super.getActivity().getString(R.string.widget_quiz_baseline_goto_course));
-			restartBtn.setTextSize(20);
-			restartBtn.setTypeface(Typeface.DEFAULT_BOLD);
 			restartBtn.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
 					QuizWidget.this.getActivity().finish();
 				}
 			});
-
-			responsesLL.addView(restartBtn);
 		} else {
-			// set page heading
-			TextView progress = (TextView) getView().findViewById(R.id.mquiz_progress);
-			progress.setText(super.getActivity().getString(R.string.widget_quiz_results));
-
-			// show final score
-			TextView intro = new TextView(super.getActivity());
-			intro.setText(super.getActivity().getString(R.string.widget_quiz_results_intro));
-			intro.setGravity(Gravity.CENTER);
-			intro.setTextSize(20);
-			responsesLL.addView(intro);
-
-			TextView score = new TextView(super.getActivity());
-			score.setText(super.getActivity().getString(R.string.widget_quiz_results_score, this.getPercent()));
-			score.setTextSize(60);
-			score.setLayoutParams(new TableLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-			score.setGravity(Gravity.CENTER);
-			score.setPadding(0, 20, 0, 20);
-			responsesLL.addView(score);
-
-			Button restartBtn = new Button(super.getActivity());
 			restartBtn.setText(super.getActivity().getString(R.string.widget_quiz_results_restart));
-			restartBtn.setTextSize(20);
-			restartBtn.setTypeface(Typeface.DEFAULT_BOLD);
 			restartBtn.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					restart();
+					QuizWidget.this.restart();
 				}
 			});
-
-			responsesLL.addView(restartBtn);
 		}
 	}
 
 	private void restart() {
 		this.setStartTime(System.currentTimeMillis() / 1000);
+		
 		quiz = new Quiz();
 		quiz.load(quizContent);
 		isOnResultsPage = false;
+		
+		// reload quiz layout
+		View C = getView().findViewById(R.id.widget_quiz_results);
+	    ViewGroup parent = (ViewGroup) C.getParent();
+	    int index = parent.indexOfChild(C);
+	    parent.removeView(C);
+	    C = super.getActivity().getLayoutInflater().inflate(R.layout.widget_quiz, parent, false);
+	    parent.addView(C, index);
+	    
+	    prevBtn = (Button) getView().findViewById(R.id.mquiz_prev_btn);
+		nextBtn = (Button) getView().findViewById(R.id.mquiz_next_btn);
+		qText = (TextView) getView().findViewById(R.id.question_text);
+		questionImage = (LinearLayout) getView().findViewById(R.id.question_image);
+		questionImage.setVisibility(View.GONE);
 		this.showQuestion();
 	}
 
@@ -475,6 +484,13 @@ public class QuizWidget extends WidgetFactory {
 		float percent = quiz.getUserscore() * 100 / quiz.getMaxscore();
 		return percent;
 	}
+	
+	// TODO
+	/*private String getOverallFeedback(){
+		String feedback = "";
+		
+		return feedback;
+	}*/
 	
 	private class OnImageClickListener implements OnClickListener{
 
