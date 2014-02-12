@@ -19,9 +19,9 @@ package org.digitalcampus.oppia.adapter;
 
 import java.util.ArrayList;
 
-import org.digitalcampus.mobile.learning.R;
 import org.digitalcampus.oppia.application.MobileLearning;
 import org.digitalcampus.oppia.model.QuizFeedback;
+import org.nurhi.oppia.R;
 
 import android.app.Activity;
 import android.content.Context;
@@ -40,7 +40,7 @@ public class QuizFeedbackAdapter extends ArrayAdapter<QuizFeedback> {
 	private final ArrayList<QuizFeedback> quizFeedbackList;
 	
 	public QuizFeedbackAdapter(Activity context, ArrayList<QuizFeedback> quizFeedbackList) {
-		super(context, R.layout.widget_quiz_feedback_row, quizFeedbackList);
+		super(context,R.layout.widget_quiz_feedback_row, quizFeedbackList);
 		this.ctx = context;
 		this.quizFeedbackList = quizFeedbackList;
 	}
