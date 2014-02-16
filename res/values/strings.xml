@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">NURHI</string>
+    <string name="app_name">NURHI Training</string>
     <string name="app_logo_alt">Digital Campus Logo</string>
     
     <string name="menu_download">Manage Courses</string>
@@ -82,6 +82,9 @@
 	<string name="register_form_lastname_title">Last name</string>
 	<string name="register_form_password_title">Password</string>
 	<string name="register_form_password_again_title">Password (again)</string>
+	<string name="register_form_phone_no_title">Your phone number</string>
+	
+	
 	<string name="register_btn_text">Register</string>
 	
 	<string name="yes">Yes</string>

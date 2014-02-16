@@ -55,6 +55,18 @@ public class RegisterActivity extends AppActivity implements SubmitListener {
 	private EditText passwordAgainField;
 	private EditText firstnameField;
 	private EditText lastnameField;
+	
+	private EditText phonenoField; //
+	private EditText currentWorkingCityField;  // Q1
+	private EditText currentlyWorkingFacilityField;
+	private EditText currentPlaceEmployment; 
+	private EditText staffTypeField;
+	private EditText nurhiSponsorTrainingField;
+	private EditText highestEducationLevelField; // Q11
+	private EditText religionField; // Q12
+	private EditText sexField; // Q13
+	private EditText ageField; // Q14
+    
 	private ProgressDialog pDialog;
 
 	@Override
