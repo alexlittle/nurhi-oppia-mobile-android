@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string-array name="NoScheduleReminders">
         <item name="1">1</item>
         <item name="2">2</item>
@@ -14,4 +15,26 @@
         <item name="4">4</item>
         <item name="5">5</item>
     </string-array>
+    <string-array name="registerFormCurrentlyWorkingFacility">
+        <item name="0"></item>
+        <item name="1">Karshi General Hospital</item>
+        <item name="2">Bwari General Hospital</item>
+        <item name="3">Gwarinpa General Hospital</item>
+        <item name="4">Asokoro General Hospital</item>
+        <item name="5">Maitama Distric Hospital</item>
+        <item name="6">WUSE General Hospital</item>
+        <item name="7">Kubwa General Hospital</item>
+        <item name="8">Nyanya General Hospital</item>
+        <item name="9">Family Health Clinic</item>
+        <item name="10">Mpape PHC</item>
+        <item name="11">University College Hospital</item>
+        <item name="12">Adeoyo Teach Mat Hospital</item>
+        <item name="13">Sabo PHC</item>
+        <item name="14">IDI-Ogunugun</item>
+        <item name="15">Group Medical</item>
+        <item name="16">Bashorun Phc</item>
+        <item name="17">Sango Phc</item>
+        <item name="18">Ayekale/Oja Lgobo</item>
+    </string-array>
+
 </resources>

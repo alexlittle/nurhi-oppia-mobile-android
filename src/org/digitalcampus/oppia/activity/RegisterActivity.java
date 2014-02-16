@@ -18,6 +18,7 @@
 package org.digitalcampus.oppia.activity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.digitalcampus.oppia.application.MobileLearning;
 import org.digitalcampus.oppia.listener.SubmitListener;
@@ -39,7 +40,9 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 public class RegisterActivity extends AppActivity implements SubmitListener {
 
@@ -57,11 +60,13 @@ public class RegisterActivity extends AppActivity implements SubmitListener {
 	private EditText lastnameField;
 	
 	private EditText phonenoField; //
-	private EditText currentWorkingCityField;  // Q1
-	private EditText currentlyWorkingFacilityField;
+	private Spinner currentlyWorkingFacilityField;
+	private EditText nurhiTrainingField;
+	
+	//private EditText currentWorkingCityField;  // Q1
+	
 	private EditText currentPlaceEmployment; 
 	private EditText staffTypeField;
-	private EditText nurhiSponsorTrainingField;
 	private EditText highestEducationLevelField; // Q11
 	private EditText religionField; // Q12
 	private EditText sexField; // Q13
@@ -82,6 +87,16 @@ public class RegisterActivity extends AppActivity implements SubmitListener {
 		passwordAgainField = (EditText) findViewById(R.id.register_form_password_again_field);
 		firstnameField = (EditText) findViewById(R.id.register_form_firstname_field);
 		lastnameField = (EditText) findViewById(R.id.register_form_lastname_field);
+		
+		phonenoField = (EditText) findViewById(R.id.register_form_phone_no_field);
+		currentlyWorkingFacilityField = (Spinner) findViewById(R.id.currently_working_facility_spinner);
+		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+		        R.array.registerFormCurrentlyWorkingFacility, android.R.layout.simple_spinner_item);
+		// Specify the layout to use when the list of choices appears
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		// Apply the adapter to the spinner
+		currentlyWorkingFacilityField.setAdapter(adapter);
+		nurhiTrainingField = (EditText) findViewById(R.id.register_form_nurhi_training_field);
 	}
 
 	public void submitComplete(Payload response) {
@@ -115,7 +130,12 @@ public class RegisterActivity extends AppActivity implements SubmitListener {
 		String passwordAgain = (String) passwordAgainField.getText().toString();
 		String firstname = (String) firstnameField.getText().toString();
 		String lastname = (String) lastnameField.getText().toString();
-
+		
+		//extra data for NURHI		
+		String phoneNo = (String) phonenoField.getText().toString(); 
+		String currentWorkingFacility = currentlyWorkingFacilityField.getSelectedItem().toString();
+		String nurhiTraining = (String) nurhiTrainingField.getText().toString(); 
+		
 		// do validation
 		// TODO change to be proper lang strings
 		// check firstname
@@ -152,6 +172,20 @@ public class RegisterActivity extends AppActivity implements SubmitListener {
 			return;
 		}
 
+		// check NURHI extra data
+		if(phoneNo.length()<6){
+			this.showAlert(getString(R.string.error), "Please enter your phone number", ONCLICK_TASK_NULL);
+			return;
+		}
+		if(currentWorkingFacility.length() == 0){
+			this.showAlert(getString(R.string.error), "Please enter your current working facility", ONCLICK_TASK_NULL);
+			return;
+		}
+		if(nurhiTraining.length() == 0){
+			this.showAlert(getString(R.string.error), "Please enter your the number of NURHI sponsored training you have attended", ONCLICK_TASK_NULL);
+			return;
+		}
+		
 		pDialog = new ProgressDialog(this);
 		pDialog.setTitle("Register");
 		pDialog.setMessage("Registering...");
@@ -166,6 +200,17 @@ public class RegisterActivity extends AppActivity implements SubmitListener {
 		u.setFirstname(firstname);
 		u.setLastname(lastname);
 		u.setEmail(email);
+		u.addExtraData("phoneno", phoneNo);
+		u.addExtraData("currently_working_facility", phoneNo);
+		u.addExtraData("nurhi_sponsor_training", nurhiTraining);
+		
+		u.addExtraData("current_working_city", phoneNo);
+		u.addExtraData("current_place_employment", phoneNo); 
+		u.addExtraData("staff_type", phoneNo);
+		u.addExtraData("highest_education_level", phoneNo);
+		u.addExtraData("religion", phoneNo);
+		u.addExtraData("sex", phoneNo);
+		u.addExtraData("age", phoneNo);
 		users.add(u);
 		Payload p = new Payload(users);
 		RegisterTask lt = new RegisterTask(this);
@@ -180,23 +225,18 @@ public class RegisterActivity extends AppActivity implements SubmitListener {
 		switch (onClickTask) {
 			case ONCLICK_TASK_NULL:
 				builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-	
 					public void onClick(DialogInterface dialog, int which) {
 						// do nothing
-	
 					}
-	
 				});
 				break;
 			case ONCLICK_TASK_REGISTERED :
 				builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-					
 					public void onClick(DialogInterface dialog, int which) {
 						// return to main activity
 						RegisterActivity.this.startActivity(new Intent(RegisterActivity.this, OppiaMobileActivity.class));
 						RegisterActivity.this.finish();
 					}
-	
 				});
 				break;
 		}

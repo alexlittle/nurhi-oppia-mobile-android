@@ -17,6 +17,8 @@
 
 package org.digitalcampus.oppia.model;
 
+import java.util.HashMap;
+
 public class User {
 
 	private String username;
@@ -26,6 +28,8 @@ public class User {
 	private String firstname;
 	private String lastname;
 	private String api_key;
+	private HashMap<String,String> extraData = new HashMap<String,String>();
+	
 	private boolean scoringEnabled = true;
 	private int points = 0;
 	private int badges = 0;
@@ -94,5 +98,20 @@ public class User {
 	public void setScoringEnabled(boolean scoringEnabled) {
 		this.scoringEnabled = scoringEnabled;
 	}
+	
+	public void addExtraData(String key, String value){
+		this.extraData.put(key, value);
+	}
 
+	public String getExtraData(String key){
+		if (extraData.containsKey(key)){
+			return this.extraData.get(key);
+		} else {
+			return null;
+		}
+	}
+	
+	public HashMap<String,String> getExtraData(){
+		return this.extraData;
+	}
 }

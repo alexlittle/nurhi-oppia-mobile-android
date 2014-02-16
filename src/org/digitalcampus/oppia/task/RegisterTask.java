@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.Map.Entry;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -82,6 +83,10 @@ public class RegisterTask extends AsyncTask<Payload, Object, Payload> {
             json.put("email",u.getEmail());
             json.put("firstname",u.getFirstname());
             json.put("lastname",u.getLastname());
+            for (Entry<String, String> entry : u.getExtraData().entrySet()) {
+            	json.put(entry.getKey(), entry.getValue());
+            }
+            
             StringEntity se = new StringEntity(json.toString());
             se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
             httpPost.setEntity(se);

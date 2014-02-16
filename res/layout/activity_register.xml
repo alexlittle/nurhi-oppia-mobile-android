@@ -86,7 +86,44 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"/>
+            
+            <TextView
+                android:id="@+id/register_form_phone_no_title"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/register_form_phone_no_title" />
 
+            <EditText
+                android:id="@+id/register_form_phone_no_field"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:inputType="phone"/>
+
+            
+            <TextView
+                android:id="@+id/register_form_currently_working_facility_title"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/register_form_currently_working_facility_title" />
+            
+            <Spinner
+			    android:id="@+id/currently_working_facility_spinner"
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content" />
+            
+            
+            <TextView
+                android:id="@+id/register_form_nurhi_training_title"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/register_form_nurhi_training_title" />
+
+            <EditText
+                android:id="@+id/register_form_nurhi_training_field"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"/>
+            
             <Button
                 android:id="@+id/register_btn"
                 android:layout_width="fill_parent"
