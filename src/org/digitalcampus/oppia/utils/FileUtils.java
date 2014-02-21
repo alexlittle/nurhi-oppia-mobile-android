@@ -118,7 +118,7 @@ public class FileUtils {
 					while ((count = zis.read(data, 0, BUFFER_SIZE)) != -1) {
 						dest.write(data, 0, count);
 						counter++;
-						if (counter > 5000) {
+						if (counter > 100000) {
 							dest.flush();
 							dest.close();
 							return false;

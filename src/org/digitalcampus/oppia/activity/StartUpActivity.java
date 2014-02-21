@@ -42,6 +42,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.widget.TextView;
 
 public class StartUpActivity extends Activity implements UpgradeListener, PostInstallListener, InstallCourseListener{
@@ -114,6 +115,7 @@ public class StartUpActivity extends Activity implements UpgradeListener, PostIn
 	
 	public void upgradeComplete(Payload p) {
 		if(p.isResult()){
+			Log.d(TAG,"starting post install task");
 			Payload payload = new Payload();
 			PostInstallTask piTask = new PostInstallTask(this);
 			piTask.setPostInstallListener(this);

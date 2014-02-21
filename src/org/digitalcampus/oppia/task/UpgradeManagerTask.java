@@ -37,6 +37,7 @@ public class UpgradeManagerTask extends AsyncTask<Payload, String, Payload> {
 		Payload payload = params[0];
 		
 		payload.setResult(false);
+		
 		if(!prefs.getBoolean("upgradeV17",false)){
 			upgradeV17();
 			Editor editor = prefs.edit();
@@ -63,13 +64,13 @@ public class UpgradeManagerTask extends AsyncTask<Payload, String, Payload> {
 			payload.setResult(true);
 		}
 		
-		if(!prefs.getBoolean("upgradeV29a",false)){
+		if(!prefs.getBoolean("upgradeV29d",false)){
 	        Editor editor = prefs.edit();
-	        editor.putBoolean("upgradeV29a", true);
+	        editor.putBoolean("upgradeV29d", true);
 	        editor.commit();
-	        publishProgress("Upgraded to v29a");
+	        publishProgress("Upgraded to v29d");
 	        payload.setResult(true);
-	}
+		}
 		
 		return payload;
 	}

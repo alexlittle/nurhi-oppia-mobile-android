@@ -28,6 +28,7 @@ import org.digitalcampus.oppia.model.DownloadProgress;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 
 public class PostInstallTask extends AsyncTask<Payload, DownloadProgress, Payload>{
 
@@ -50,6 +51,7 @@ public class PostInstallTask extends AsyncTask<Payload, DownloadProgress, Payloa
 			directory = this.ctx.getAssets().list(MobileLearning.PRE_INSTALL_COURSES_DIR);
 			for (int index = 0; index < directory.length; index++)  {   
 		       if (directory[index].toString().endsWith(".zip")){
+		    	   Log.d(TAG,directory[index].toString());
 		    	   FileOutputStream f = new FileOutputStream(new File(MobileLearning.DOWNLOAD_PATH,directory[index].toString()));
 		    	   InputStream is = this.ctx.getAssets().open(MobileLearning.PRE_INSTALL_COURSES_DIR + "/" + directory[index].toString());
 		    	   byte[] buffer = new byte[1024];

@@ -36,6 +36,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 public class InstallDownloadedCoursesTask extends AsyncTask<Payload, DownloadProgress, Payload>{
 	
@@ -61,7 +62,7 @@ public class InstallDownloadedCoursesTask extends AsyncTask<Payload, DownloadPro
 		if (children != null) {
 
 			for (int i = 0; i < children.length; i++) {
-
+				Log.d(TAG,"installing downloaded file: "+ children[i]);
 				// extract to temp dir and check it's a valid package file
 				File tempdir = new File(MobileLearning.OPPIAMOBILE_ROOT + "temp/");
 				tempdir.mkdirs();
@@ -69,6 +70,7 @@ public class InstallDownloadedCoursesTask extends AsyncTask<Payload, DownloadPro
 				
 				if (!unzipResult){
 					//then was invalid zip file and should be removed
+					Log.d(TAG,"73: invalid zip file - flagged for removal");
 					FileUtils.cleanUp(tempdir, MobileLearning.DOWNLOAD_PATH + children[i]);
 					break;
 				}
@@ -84,6 +86,7 @@ public class InstallDownloadedCoursesTask extends AsyncTask<Payload, DownloadPro
 					courseScheduleXMLPath = tempdir + "/" + courseDirs[0] + "/" + MobileLearning.COURSE_SCHEDULE_XML;
 					courseTrackerXMLPath = tempdir + "/" + courseDirs[0] + "/" + MobileLearning.COURSE_TRACKER_XML;
 				} catch (ArrayIndexOutOfBoundsException aioobe){
+					Log.d(TAG,"89: invalid zip file - flagged for removal");
 					FileUtils.cleanUp(tempdir, MobileLearning.DOWNLOAD_PATH + children[i]);
 					break;
 				}
@@ -97,6 +100,7 @@ public class InstallDownloadedCoursesTask extends AsyncTask<Payload, DownloadPro
 					csxr = new CourseScheduleXMLReader(courseScheduleXMLPath);
 					ctxr = new CourseTrackerXMLReader(courseTrackerXMLPath);
 				} catch (InvalidXMLException e) {
+					Log.d(TAG,"invalid xml file - flagged for removal");
 					payload.setResult(false);
 					return payload;
 				}
