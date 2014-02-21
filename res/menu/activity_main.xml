@@ -25,9 +25,9 @@
         android:id="@+id/menu_help"
         android:icon="@android:drawable/ic_menu_help"
         android:title="@string/menu_help"/>
-    <item
+    <!-- item
         android:id="@+id/menu_monitor"
-        android:title="@string/menu_monitor"/>
+        android:title="@string/menu_monitor"/ -->
     <item
         android:id="@+id/menu_logout"
         android:icon="@drawable/ic_action_logout"

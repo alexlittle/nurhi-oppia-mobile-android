@@ -36,5 +36,46 @@
         <item name="17">Sango Phc</item>
         <item name="18">Ayekale/Oja Lgobo</item>
     </string-array>
-
+    <string-array name="registerFormStaffType">
+        <item name="0"></item>
+        <item name="1">Physician</item>
+        <item name="2">Midwife</item>
+        <item name="3">Nurse</item>
+        <item name="4">Nurse-Midwife</item>
+        <item name="5">FP/RH Coordinator</item>
+        <item name="6">FP Trainer</item>
+        <item name="7">Community Health Officer</item>
+    </string-array>
+    <string-array name="registerFormFPMethods">
+        <item name="1">Combined oral contraceptive pills</item>
+        <item name="2">Progestin only oral contraceptive pills</item>
+        <item name="3">Male condoms</item>
+        <item name="4">Female condoms</item>
+        <item name="5">Emergency contraception</item>
+        <item name="6">Injectables</item>
+        <item name="7">Implants</item>
+        <item name="8">IUD</item>
+        <item name="9">Female sterilization</item>
+        <item name="10">Male sterilization</item>
+    </string-array>
+    <string-array name="registerFormEducationalLevel">
+        <item name="1"></item>
+        <item name="2">Primary</item>
+        <item name="3">Junior Secondary</item>
+        <item name="4">Senior Secondary</item>
+        <item name="5">Higher</item>
+    </string-array>
+	<string-array name="registerFormReligion">
+        <item name="1"></item>
+        <item name="2">Christian</item>
+        <item name="3">Muslim</item>
+        <item name="4">Traditionalist</item>
+        <item name="5">Other</item>
+    </string-array>
+    <string-array name="registerFormSex">
+        <item name="1"></item>
+        <item name="2">Female</item>
+        <item name="3">Male</item>
+    </string-array>
+    
 </resources>

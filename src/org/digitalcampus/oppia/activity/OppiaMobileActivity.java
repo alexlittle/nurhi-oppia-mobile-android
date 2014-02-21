@@ -230,9 +230,9 @@ public class OppiaMobileActivity extends AppActivity implements OnSharedPreferen
 			case R.id.menu_help:
 				startActivity(new Intent(this, HelpActivity.class));
 				return true;
-			case R.id.menu_monitor:
+			/*case R.id.menu_monitor:
 				startActivity(new Intent(this, MonitorActivity.class));
-				return true;
+				return true;*/
 			case R.id.menu_logout:
 				logout();
 				return true;

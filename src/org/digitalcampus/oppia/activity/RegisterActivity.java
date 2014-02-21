@@ -41,7 +41,9 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 public class RegisterActivity extends AppActivity implements SubmitListener {
@@ -62,15 +64,13 @@ public class RegisterActivity extends AppActivity implements SubmitListener {
 	private EditText phonenoField; //
 	private Spinner currentlyWorkingFacilityField;
 	private EditText nurhiTrainingField;
+	private Spinner staffTypeField;
 	
-	//private EditText currentWorkingCityField;  // Q1
-	
-	private EditText currentPlaceEmployment; 
-	private EditText staffTypeField;
-	private EditText highestEducationLevelField; // Q11
-	private EditText religionField; // Q12
-	private EditText sexField; // Q13
-	private EditText ageField; // Q14
+	private LinearLayout fpMethodsProvided;
+	private Spinner highestEducationLevelField;
+	private Spinner religionField;
+	private Spinner sexField;
+	private EditText ageField;
     
 	private ProgressDialog pDialog;
 
@@ -89,14 +89,59 @@ public class RegisterActivity extends AppActivity implements SubmitListener {
 		lastnameField = (EditText) findViewById(R.id.register_form_lastname_field);
 		
 		phonenoField = (EditText) findViewById(R.id.register_form_phone_no_field);
+		
 		currentlyWorkingFacilityField = (Spinner) findViewById(R.id.currently_working_facility_spinner);
-		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+		ArrayAdapter<CharSequence> cwfadapter = ArrayAdapter.createFromResource(this,
 		        R.array.registerFormCurrentlyWorkingFacility, android.R.layout.simple_spinner_item);
 		// Specify the layout to use when the list of choices appears
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		cwfadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		// Apply the adapter to the spinner
-		currentlyWorkingFacilityField.setAdapter(adapter);
+		currentlyWorkingFacilityField.setAdapter(cwfadapter);
+		
 		nurhiTrainingField = (EditText) findViewById(R.id.register_form_nurhi_training_field);
+		
+		staffTypeField = (Spinner) findViewById(R.id.staff_type_spinner);
+		ArrayAdapter<CharSequence> stadapter = ArrayAdapter.createFromResource(this,
+		        R.array.registerFormStaffType, android.R.layout.simple_spinner_item);
+		// Specify the layout to use when the list of choices appears
+		stadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		// Apply the adapter to the spinner
+		staffTypeField.setAdapter(stadapter);
+		
+		fpMethodsProvided = (LinearLayout) findViewById(R.id.register_form_fp_methods);
+		fpMethodsProvided.removeAllViews();
+		String[] fpMethods = getResources().getStringArray(R.array.registerFormFPMethods);
+		for (String s: fpMethods){
+			CheckBox chk= new CheckBox(this);  
+    		chk.setText(s);
+    		fpMethodsProvided.addView(chk);
+		}
+		
+		highestEducationLevelField = (Spinner) findViewById(R.id.education_level_spinner);
+		ArrayAdapter<CharSequence> heladapter = ArrayAdapter.createFromResource(this,
+		        R.array.registerFormEducationalLevel, android.R.layout.simple_spinner_item);
+		// Specify the layout to use when the list of choices appears
+		heladapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		// Apply the adapter to the spinner
+		highestEducationLevelField.setAdapter(heladapter);
+		
+		religionField = (Spinner) findViewById(R.id.religion_spinner);
+		ArrayAdapter<CharSequence> radapter = ArrayAdapter.createFromResource(this,
+		        R.array.registerFormReligion, android.R.layout.simple_spinner_item);
+		// Specify the layout to use when the list of choices appears
+		radapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		// Apply the adapter to the spinner
+		religionField.setAdapter(radapter);
+		
+		sexField = (Spinner) findViewById(R.id.sex_spinner);
+		ArrayAdapter<CharSequence> sadapter = ArrayAdapter.createFromResource(this,
+		        R.array.registerFormSex, android.R.layout.simple_spinner_item);
+		// Specify the layout to use when the list of choices appears
+		sadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		// Apply the adapter to the spinner
+		sexField.setAdapter(sadapter);
+		
+		ageField = (EditText) findViewById(R.id.register_form_age_field);
 	}
 
 	public void submitComplete(Payload response) {
@@ -135,6 +180,20 @@ public class RegisterActivity extends AppActivity implements SubmitListener {
 		String phoneNo = (String) phonenoField.getText().toString(); 
 		String currentWorkingFacility = currentlyWorkingFacilityField.getSelectedItem().toString();
 		String nurhiTraining = (String) nurhiTrainingField.getText().toString(); 
+		String staffType = staffTypeField.getSelectedItem().toString();
+		String fpMethods = "";
+		int count = fpMethodsProvided.getChildCount();
+		for (int i=0; i<count; i++) {
+			CheckBox cb = (CheckBox) fpMethodsProvided.getChildAt(i);
+			if(cb.isChecked()){
+				fpMethods+=cb.getText().toString()+", ";
+			}
+		}
+		Log.d(TAG,fpMethods);
+		String educationLevel = highestEducationLevelField.getSelectedItem().toString();
+		String religion = religionField.getSelectedItem().toString();
+		String sex = sexField.getSelectedItem().toString();
+		String age = (String) ageField.getText().toString();
 		
 		// do validation
 		// TODO change to be proper lang strings
@@ -185,6 +244,30 @@ public class RegisterActivity extends AppActivity implements SubmitListener {
 			this.showAlert(getString(R.string.error), "Please enter your the number of NURHI sponsored training you have attended", ONCLICK_TASK_NULL);
 			return;
 		}
+		if(staffType.length() == 0){
+			this.showAlert(getString(R.string.error), "Please enter your staff type", ONCLICK_TASK_NULL);
+			return;
+		}
+		if(fpMethods.length() == 0){
+			this.showAlert(getString(R.string.error), "Please enter the family planning methods your facility provides.", ONCLICK_TASK_NULL);
+			return;
+		}
+		if(educationLevel.length() == 0){
+			this.showAlert(getString(R.string.error), "Please enter your education level.", ONCLICK_TASK_NULL);
+			return;
+		}
+		if(religion.length() == 0){
+			this.showAlert(getString(R.string.error), "Please enter your religion.", ONCLICK_TASK_NULL);
+			return;
+		}
+		if(sex.length() == 0){
+			this.showAlert(getString(R.string.error), "Please enter your sex.", ONCLICK_TASK_NULL);
+			return;
+		}
+		if(age.length() == 0){
+			this.showAlert(getString(R.string.error), "Please enter your age.", ONCLICK_TASK_NULL);
+			return;
+		}
 		
 		pDialog = new ProgressDialog(this);
 		pDialog.setTitle("Register");
@@ -201,16 +284,14 @@ public class RegisterActivity extends AppActivity implements SubmitListener {
 		u.setLastname(lastname);
 		u.setEmail(email);
 		u.addExtraData("phoneno", phoneNo);
-		u.addExtraData("currently_working_facility", phoneNo);
+		u.addExtraData("currently_working_facility", currentWorkingFacility);
 		u.addExtraData("nurhi_sponsor_training", nurhiTraining);
-		
-		u.addExtraData("current_working_city", phoneNo);
-		u.addExtraData("current_place_employment", phoneNo); 
-		u.addExtraData("staff_type", phoneNo);
-		u.addExtraData("highest_education_level", phoneNo);
-		u.addExtraData("religion", phoneNo);
-		u.addExtraData("sex", phoneNo);
-		u.addExtraData("age", phoneNo);
+		u.addExtraData("staff_type", staffType);
+		u.addExtraData("fp_methods_provided", fpMethods);
+		u.addExtraData("highest_education_level", educationLevel);
+		u.addExtraData("religion", religion);
+		u.addExtraData("sex", sex);
+		u.addExtraData("age", age);
 		users.add(u);
 		Payload p = new Payload(users);
 		RegisterTask lt = new RegisterTask(this);

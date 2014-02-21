@@ -87,6 +87,8 @@ public class RegisterTask extends AsyncTask<Payload, Object, Payload> {
             	json.put(entry.getKey(), entry.getValue());
             }
             
+            Log.d(TAG,json.toString());
+            
             StringEntity se = new StringEntity(json.toString());
             se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
             httpPost.setEntity(se);
@@ -137,6 +139,7 @@ public class RegisterTask extends AsyncTask<Payload, Object, Payload> {
 					payload.setResultResponse(ctx.getString(R.string.register_complete));
 					break;
 				default:
+					Log.d(TAG, responseStr);
 					payload.setResult(false);
 					payload.setResultResponse(ctx.getString(R.string.error_connection));
 			}

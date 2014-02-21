@@ -85,6 +85,13 @@
 	<string name="register_form_phone_no_title">Your phone number</string>
 	<string name="register_form_currently_working_facility_title">Please select the facility where you currently work</string>
 	<string name="register_form_nurhi_training_title">How many times have you attended NURHI sponsored training?</string>
+	<string name="register_form_staff_type_title">What type of staff are you?</string>
+	<string name="register_form_fp_methods_title">What type of family planning methods does your facility provide? (select all that apply)</string>
+	<string name="register_form_education_level_title">What is the highest level of education you attended?</string>
+	<string name="register_form_religion_title">What is your religion?</string>
+	<string name="register_form_sex_title">What is your sex?</string>
+	<string name="register_form_age_title">What is your age?</string>
+	
 	
 	<string name="register_btn_text">Register</string>
 	
