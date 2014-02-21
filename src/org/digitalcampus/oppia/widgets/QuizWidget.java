@@ -343,7 +343,7 @@ public class QuizWidget extends WidgetFactory {
 		// TODO add TextView here to give overall feedback if it's in the quiz
 		
 		// Show the detail of which questions were right/wrong
-		ListView questionFeedbackLV = (ListView) getView().findViewById(R.id.quiz_results_feedback);
+		/*ListView questionFeedbackLV = (ListView) getView().findViewById(R.id.quiz_results_feedback);
 		ArrayList<QuizFeedback> quizFeedback = new ArrayList<QuizFeedback>();
 		List<QuizQuestion> questions = this.quiz.getQuestions();
 		for(QuizQuestion q: questions){
@@ -357,10 +357,10 @@ public class QuizWidget extends WidgetFactory {
 			}
 		}
 		QuizFeedbackAdapter qfa = new QuizFeedbackAdapter(super.getActivity(), quizFeedback);
-		questionFeedbackLV.setAdapter(qfa);
+		questionFeedbackLV.setAdapter(qfa);*/
 		
 		// Show restart or continue button
-		Button restartBtn = (Button) getView().findViewById(R.id.quiz_results_button);
+		/*Button restartBtn = (Button) getView().findViewById(R.id.quiz_results_button);
 		
 		if (this.isBaseline) {
 			restartBtn.setText(super.getActivity().getString(R.string.widget_quiz_baseline_goto_course));
@@ -376,7 +376,7 @@ public class QuizWidget extends WidgetFactory {
 					QuizWidget.this.restart();
 				}
 			});
-		}
+		}*/
 	}
 
 	private void restart() {
