@@ -1,6 +1,10 @@
 package org.digitalcampus.oppia.task;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 import org.digitalcampus.oppia.application.DbHelper;
 import org.digitalcampus.oppia.application.MobileLearning;
@@ -17,6 +21,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -65,11 +70,23 @@ public class UpgradeManagerTask extends AsyncTask<Payload, String, Payload> {
 		}
 		
 		if(!prefs.getBoolean("upgradeV29d",false)){
+			
 	        Editor editor = prefs.edit();
 	        editor.putBoolean("upgradeV29d", true);
 	        editor.commit();
 	        publishProgress("Upgraded to v29d");
 	        payload.setResult(true);
+		}
+		
+		if(!prefs.getBoolean("upgradeV30",false)){
+			if(upgradeV30(Environment.getExternalStorageDirectory() + "/NigerianProjectFile/video/") 
+					&& upgradeV30(Environment.getExternalStorageDirectory() + "/NigerianProjectFile/media/")){
+		        Editor editor = prefs.edit();
+		        editor.putBoolean("upgradeV30", true);
+		        editor.commit();
+		        publishProgress("Upgraded to v30");
+		        payload.setResult(true);
+			}
 		}
 		
 		return payload;
@@ -147,7 +164,51 @@ public class UpgradeManagerTask extends AsyncTask<Payload, String, Payload> {
 		editor.commit();
 	}
 	
-	
+	/*
+	 * Move video files from previous location to new one
+	 */
+	private boolean upgradeV30(String previousMediaDirectory){
+		String cardstatus = Environment.getExternalStorageState();
+		if (cardstatus.equals(Environment.MEDIA_REMOVED)
+				|| cardstatus.equals(Environment.MEDIA_UNMOUNTABLE)
+				|| cardstatus.equals(Environment.MEDIA_UNMOUNTED)
+				|| cardstatus.equals(Environment.MEDIA_MOUNTED_READ_ONLY)
+				|| cardstatus.equals(Environment.MEDIA_SHARED)) {
+			return false;
+		}
+		
+		// Check whether the directory all ready exists
+		File dir = new File(previousMediaDirectory);
+		if(!dir.exists()){
+			return true;
+		}
+		if (!dir.isDirectory()) {
+			return true;
+		}
+		
+		// copy all the files over to the new directory
+		String[] directory = dir.list();
+		try {
+			for (int index = 0; index < directory.length; index++) {
+				FileOutputStream f = new FileOutputStream(new File(MobileLearning.MEDIA_PATH, directory[index].toString()));
+				InputStream is = new FileInputStream(previousMediaDirectory + directory[index].toString());
+						
+				byte[] buffer = new byte[1024];
+				int len = 0;
+				while ((len = is.read(buffer)) > 0) {
+					f.write(buffer, 0, len);
+				}
+				f.close();
+				is.close();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}   
+		
+		// delete the old directory
+		return FileUtils.deleteDir(dir);
+	}
 	
 	@Override
 	protected void onProgressUpdate(String... obj) {
