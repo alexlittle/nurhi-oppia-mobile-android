@@ -108,6 +108,7 @@ public class LoginActivity extends AppActivity implements SubmitListener  {
 	    	editor.putInt(getString(R.string.prefs_points), u.getPoints());
 	    	editor.putInt(getString(R.string.prefs_badges), u.getBadges());
 	    	editor.putBoolean(getString(R.string.prefs_scoring_enabled), u.isScoringEnabled());
+	    	editor.putBoolean(getString(R.string.prefs_badging_enabled), u.isBadgingEnabled());
 	    	editor.commit();
 	    	
 			// return to main activity
@@ -131,6 +132,10 @@ public class LoginActivity extends AppActivity implements SubmitListener  {
 		case R.id.menu_settings:
 			Intent i = new Intent(this, PrefsActivity.class);
 			startActivity(i);
+			return true;
+		case R.id.menu_about:
+			Intent iA = new Intent(this, AboutActivity.class);
+			startActivity(iA);
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);

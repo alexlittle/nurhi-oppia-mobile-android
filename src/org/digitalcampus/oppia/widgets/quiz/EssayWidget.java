@@ -29,12 +29,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
-public class NumericalWidget extends QuestionWidget {
+public class EssayWidget extends QuestionWidget{
 
-	public static final String TAG = NumericalWidget.class.getSimpleName();
+	public static final String TAG = ShortAnswerWidget.class.getSimpleName();
 	
-	public NumericalWidget(Activity activity, View v, ViewGroup container) {
-		init(activity, container, R.layout.widget_quiz_numerical, v);
+	public EssayWidget(Activity activity, View v, ViewGroup container) {
+		init(activity, container ,R.layout.widget_quiz_shortanswer,v);
 	}
 
 
@@ -43,7 +43,7 @@ public class NumericalWidget extends QuestionWidget {
 		EditText et = (EditText) view.findViewById(R.id.responsetext);
 		Iterator<String> itr = currentAnswers.iterator(); 
 		while(itr.hasNext()) {
-		    String answer = itr.next();
+		    String answer = itr.next(); 
 		    et.setText(answer);
 		} 
 	}
@@ -58,5 +58,4 @@ public class NumericalWidget extends QuestionWidget {
 			return response;
 		}
 	}
-
 }

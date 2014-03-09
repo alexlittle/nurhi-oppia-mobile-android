@@ -37,7 +37,6 @@ import org.nurhi.oppia.R;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.ListView;
 
 import com.bugsense.trace.BugSenseHandler;
@@ -51,7 +50,6 @@ public class DownloadActivity extends AppActivity implements APIRequestListener 
 	private DownloadCourseListAdapter dla;
 	private String url;
 	private ArrayList<Course> courses;
-	private boolean inProgress;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -100,14 +98,11 @@ public class DownloadActivity extends AppActivity implements APIRequestListener 
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
 	    this.courses = (ArrayList<Course>) savedInstanceState.getSerializable("courses");
-	    this.inProgress = savedInstanceState.getBoolean("inprogress");
 	    try {
 			this.json = new JSONObject(savedInstanceState.getString("json"));
 		} catch (JSONException e) {
 			// error in the json so just get the list again
-		}
-	    Log.d(TAG,"restored instance state");
-	    
+		}	    
 	}
 
 	@Override
@@ -116,7 +111,6 @@ public class DownloadActivity extends AppActivity implements APIRequestListener 
 	    savedInstanceState.putString("json", json.toString());
 	    savedInstanceState.putSerializable("courses", courses);
 	    savedInstanceState.putBoolean("inprogress", dla.isInProgress());
-	    Log.d(TAG,"saved instance state");
 	}
 	
 	private void getCourseList() {
@@ -154,6 +148,19 @@ public class DownloadActivity extends AppActivity implements APIRequestListener 
 					titles.add(l);
 		        }
 		        dc.setTitles(titles);
+		        
+		        ArrayList<Lang> descriptions = new ArrayList<Lang>();
+		        if (json_obj.has("description") && !json_obj.isNull("description")){
+					JSONObject jsonDescriptions = json_obj.getJSONObject("description");
+					Iterator<?> dkeys = jsonDescriptions.keys();
+			        while( dkeys.hasNext() ){
+			            String key = (String) dkeys.next();
+			            Lang l = new Lang(key,jsonDescriptions.getString(key));
+			            descriptions.add(l);
+			        }
+			        dc.setDescriptions(descriptions);
+		        }
+		        
 		        dc.setShortname(json_obj.getString("shortname"));
 		        dc.setVersionId(json_obj.getDouble("version"));
 		        dc.setDownloadUrl(json_obj.getString("url"));

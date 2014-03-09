@@ -29,6 +29,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.nurhi.oppia.R;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -134,12 +135,11 @@ public class TrackerService extends Service implements APIRequestListener{
 
 	public void apiRequestComplete(Payload response) {
 		DbHelper db = new DbHelper(this);
-		Log.d(TAG,"completed getting course list");
 		
 		boolean updateAvailable = false;
 		try {
-			Log.d(TAG,response.getResultResponse());
 			JSONObject json = new JSONObject(response.getResultResponse());
+			Log.d(TAG,json.toString(4));
 			for (int i = 0; i < (json.getJSONArray("courses").length()); i++) {
 				JSONObject json_obj = (JSONObject) json.getJSONArray("courses").get(i);
 				String shortName = json_obj.getString("shortname");
@@ -179,7 +179,9 @@ public class TrackerService extends Service implements APIRequestListener{
 				);
 			mBuilder.setContentIntent(resultPendingIntent);
 			int mId = 001;
-			notificationManager.notify(mId, mBuilder.build());
+			Notification notification = mBuilder.build();
+			notification.flags |= Notification.FLAG_AUTO_CANCEL;
+			notificationManager.notify(mId, notification);
 		}
 	}
 

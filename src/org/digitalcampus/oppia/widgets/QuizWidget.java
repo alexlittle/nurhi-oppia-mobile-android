@@ -64,7 +64,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -79,7 +78,7 @@ import android.widget.Toast;
 
 public class QuizWidget extends WidgetFactory {
 
-	private static final String TAG = QuizWidget.class.getSimpleName();
+	public static final String TAG = QuizWidget.class.getSimpleName();
 	private Quiz quiz;
 	private QuestionWidget qw;
 	public Button prevBtn;
@@ -197,7 +196,6 @@ public class QuizWidget extends WidgetFactory {
 		} else if (q instanceof Description) {
 			qw = new DescriptionWidget(super.getActivity(), getView(),container);
 		} else {
-			Log.d(TAG, "Class for question type not found");
 			return;
 		}
 		qw.setQuestionResponses(q.getResponseOptions(), q.getUserResponses());
@@ -233,16 +231,17 @@ public class QuizWidget extends WidgetFactory {
 					String feedback = "";
 					try {
 						feedback = QuizWidget.this.quiz.getCurrentQuestion().getFeedback();
+					
+						if (!feedback.equals("") && !isBaseline && !QuizWidget.this.quiz.getCurrentQuestion().getFeedbackDisplayed()) {
+							showFeedback(feedback);
+						} else if (QuizWidget.this.quiz.hasNext()) {
+							QuizWidget.this.quiz.moveNext();
+							showQuestion();
+						} else {
+							showResults();
+						}
 					} catch (InvalidQuizException e) {
 						e.printStackTrace();
-					}
-					if (!feedback.equals("") && !isBaseline) {
-						showFeedback(feedback);
-					} else if (QuizWidget.this.quiz.hasNext()) {
-						QuizWidget.this.quiz.moveNext();
-						showQuestion();
-					} else {
-						showResults();
 					}
 				} else {
 					CharSequence text = QuizWidget.super.getActivity().getString(R.string.widget_quiz_noanswergiven);
@@ -265,8 +264,7 @@ public class QuizWidget extends WidgetFactory {
 		TextView progress = (TextView) getView().findViewById(R.id.quiz_progress);
 		try {
 			if (quiz.getCurrentQuestion().responseExpected()) {
-				progress.setText(super.getActivity().getString(R.string.widget_quiz_progress, quiz.getCurrentQuestionNo(),
-						quiz.getTotalNoQuestions()));
+				progress.setText(super.getActivity().getString(R.string.widget_quiz_progress, quiz.getCurrentQuestionNo(), quiz.getTotalNoQuestions()));
 			} else {
 				progress.setText("");
 			}
@@ -308,6 +306,11 @@ public class QuizWidget extends WidgetFactory {
 			}
 		});
 		builder.show();
+		try {
+			this.quiz.getCurrentQuestion().setFeedbackDisplayed(true);
+		} catch (InvalidQuizException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void showResults() {
@@ -321,7 +324,6 @@ public class QuizWidget extends WidgetFactory {
 		DbHelper db = new DbHelper(super.getActivity());
 		db.insertQuizResult(data, course.getModId());
 		db.close();
-		Log.d(TAG, data);
 		
 		// load new layout
 		View C = getView().findViewById(R.id.quiz_progress);
@@ -464,7 +466,6 @@ public class QuizWidget extends WidgetFactory {
 		if (config.containsKey("OnResultsPage")) {
 			this.isOnResultsPage = (Boolean) config.get("OnResultsPage");
 		}
-		Log.d(TAG,"Set quiz widget config");
 	}
 
 	@Override

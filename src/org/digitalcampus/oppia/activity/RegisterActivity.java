@@ -146,7 +146,6 @@ public class RegisterActivity extends AppActivity implements SubmitListener {
 
 	public void submitComplete(Payload response) {
 		pDialog.dismiss();
-		Log.d(TAG, "Login activity reports: " + response.getResultResponse());
 		if (response.isResult()) {
 			User u = (User) response.getData().get(0);
 			// set params
@@ -157,6 +156,7 @@ public class RegisterActivity extends AppActivity implements SubmitListener {
 	    	editor.putInt(getString(R.string.prefs_points), u.getPoints());
 	    	editor.putInt(getString(R.string.prefs_points), u.getBadges());
 	    	editor.putBoolean(getString(R.string.prefs_scoring_enabled), u.isScoringEnabled());
+	    	editor.putBoolean(getString(R.string.prefs_badging_enabled), u.isBadgingEnabled());
 	    	editor.commit();
 
 			showAlert("Register", "Registration successful", ONCLICK_TASK_REGISTERED);
@@ -337,6 +337,10 @@ public class RegisterActivity extends AppActivity implements SubmitListener {
 		case R.id.menu_settings:
 			Intent i = new Intent(this, PrefsActivity.class);
 			startActivity(i);
+			return true;
+		case R.id.menu_about:
+			Intent iA = new Intent(this, AboutActivity.class);
+			startActivity(iA);
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);

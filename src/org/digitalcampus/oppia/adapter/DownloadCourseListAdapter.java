@@ -37,7 +37,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -79,6 +78,15 @@ public class DownloadCourseListAdapter extends ArrayAdapter<Course> implements I
 	    } else {
 	    	courseDraft.setVisibility(View.GONE);
 	    }
+	    
+	    TextView courseDesc = (TextView) rowView.findViewById(R.id.course_description);
+	    String desc = c.getDescription(prefs.getString(ctx.getString(R.string.prefs_language), Locale.getDefault().getLanguage()));
+	    if (desc != null){
+	    	courseDesc.setText(desc);
+	    } else {
+	    	courseDesc.setVisibility(View.GONE);
+	    }
+
 	    Button actionBtn = (Button) rowView.findViewById(R.id.action_btn);
 	    
 	    if(c.isInstalled()){
@@ -101,7 +109,6 @@ public class DownloadCourseListAdapter extends ArrayAdapter<Course> implements I
 	    	actionBtn.setOnClickListener(new View.OnClickListener() {
              	public void onClick(View v) {
              		Course dm = (Course) v.getTag();
-             		Log.d(TAG,dm.getDownloadUrl());
              		
              		ArrayList<Object> data = new ArrayList<Object>();
              		data.add(dm);

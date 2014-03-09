@@ -44,7 +44,6 @@ import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View;
@@ -232,6 +231,9 @@ public class OppiaMobileActivity extends AppActivity implements OnSharedPreferen
 				return true;
 			/*case R.id.menu_monitor:
 				startActivity(new Intent(this, MonitorActivity.class));
+				return true;
+			case R.id.menu_scorecard:
+				startActivity(new Intent(this, ScorecardActivity.class));
 				return true;*/
 			case R.id.menu_logout:
 				logout();
@@ -360,7 +362,6 @@ public class OppiaMobileActivity extends AppActivity implements OnSharedPreferen
 	}
 
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-		Log.d(TAG, key + " changed");
 		if(key.equalsIgnoreCase(getString(R.string.prefs_server))){
 			Editor editor = sharedPreferences.edit();
 			if(!sharedPreferences.getString(getString(R.string.prefs_server), "").endsWith("/")){

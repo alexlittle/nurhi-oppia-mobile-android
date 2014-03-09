@@ -31,6 +31,7 @@ public class User {
 	private HashMap<String,String> extraData = new HashMap<String,String>();
 	
 	private boolean scoringEnabled = true;
+	private boolean badgingEnabled = true;
 	private int points = 0;
 	private int badges = 0;
 	
@@ -99,8 +100,17 @@ public class User {
 		this.scoringEnabled = scoringEnabled;
 	}
 	
+
 	public void addExtraData(String key, String value){
 		this.extraData.put(key, value);
+	}
+	
+	public boolean isBadgingEnabled() {
+		return badgingEnabled;
+	}
+	
+	public void setBadgingEnabled(boolean badgingEnabled) {
+		this.badgingEnabled = badgingEnabled;
 	}
 
 	public String getExtraData(String key){

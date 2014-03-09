@@ -18,8 +18,8 @@
 package org.digitalcampus.oppia.adapter;
 
 import java.util.ArrayList;
- 
-import org.digitalcampus.oppia.model.Points;
+
+import org.digitalcampus.oppia.model.Badges;
 import org.nurhi.oppia.R;
 
 import android.app.Activity;
@@ -30,37 +30,32 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-public class PointsListAdapter extends ArrayAdapter<Points>{
+public class BadgesListAdapter extends ArrayAdapter<Badges>{
 
-	public static final String TAG = PointsListAdapter.class.getSimpleName();
+	public static final String TAG = BadgesListAdapter.class.getSimpleName();
 	
 	private final Context ctx;
-	private final ArrayList<Points> pointsList;
+	private final ArrayList<Badges> badgesList;
 	
-	public PointsListAdapter(Activity context, ArrayList<Points> pointsList) {
-		super(context, R.layout.fragment_points_list_row, pointsList);
+	public BadgesListAdapter(Activity context, ArrayList<Badges> badgesList) {
+		super(context, R.layout.fragment_badges_list_row, badgesList);
 		this.ctx = context;
-		this.pointsList = pointsList;
+		this.badgesList = badgesList;
 	}
 	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 
 		LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-	    View rowView = inflater.inflate(R.layout.fragment_points_list_row, parent, false);
-	    Points p = pointsList.get(position);
+	    View rowView = inflater.inflate(R.layout.fragment_badges_list_row, parent, false);
+	    Badges b = badgesList.get(position);
 	    
-	    TextView pointsDescription = (TextView) rowView.findViewById(R.id.points_description);
-	    pointsDescription.setText(p.getDescription());
+	    TextView badgesDescription = (TextView) rowView.findViewById(R.id.badges_description);
+	    badgesDescription.setText(b.getDescription());
 	    
-	    TextView pointsTime = (TextView) rowView.findViewById(R.id.points_time);
-	    pointsTime.setText(p.getTimeAsString());
+	    TextView badgesDate = (TextView) rowView.findViewById(R.id.badges_date);
+	    badgesDate.setText(b.getDateAsString());
 	    
-	    TextView pointsDate = (TextView) rowView.findViewById(R.id.points_date);
-	    pointsDate.setText(p.getDateAsString());
-	    
-	    TextView pointsPoints = (TextView) rowView.findViewById(R.id.points_points);
-	    pointsPoints.setText(String.valueOf(p.getPoints()));
 	    return rowView;
 	}
 }

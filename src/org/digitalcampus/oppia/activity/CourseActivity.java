@@ -30,6 +30,7 @@ import org.digitalcampus.oppia.model.Course;
 import org.digitalcampus.oppia.model.Section;
 import org.digitalcampus.oppia.utils.ImageUtils;
 import org.digitalcampus.oppia.utils.UIUtils;
+import org.digitalcampus.oppia.widgets.FeedbackWidget;
 import org.digitalcampus.oppia.widgets.PageWidget;
 import org.digitalcampus.oppia.widgets.QuizWidget;
 import org.digitalcampus.oppia.widgets.ResourceWidget;
@@ -47,7 +48,6 @@ import android.speech.tts.UtteranceProgressListener;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -128,6 +128,9 @@ public class CourseActivity extends SherlockFragmentActivity implements ActionBa
 				fragments.add(f);
 			} else if (activities.get(i).getActType().equalsIgnoreCase("resource")) {
 				f = ResourceWidget.newInstance(activities.get(i), course, isBaseline);
+				fragments.add(f);
+			} else if  (activities.get(i).getActType().equalsIgnoreCase("feedback")){
+				f = FeedbackWidget.newInstance(activities.get(i), course, isBaseline);
 				fragments.add(f);
 			}
 		}
@@ -280,7 +283,6 @@ public class CourseActivity extends SherlockFragmentActivity implements ActionBa
 				
                 @Override
                 public void onDone(String utteranceId){
-                	Log.d(TAG,"Finished reading");
             		CourseActivity.this.ttsRunning = false;
             		myTTS = null;
                 }

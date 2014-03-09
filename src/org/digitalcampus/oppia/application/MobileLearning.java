@@ -56,6 +56,7 @@ public class MobileLearning extends Application {
 	public static final String SERVER_TAG_PATH = OPPIAMOBILE_API + "tag/";
 	public static final String TRACKER_PATH = OPPIAMOBILE_API + "tracker/";
 	public static final String SERVER_POINTS_PATH = OPPIAMOBILE_API + "points/";
+	public static final String SERVER_AWARDS_PATH = OPPIAMOBILE_API + "awards/";
 	public static final String SERVER_COURSES_NAME = "courses";
 	
 	// general other settings
@@ -69,7 +70,8 @@ public class MobileLearning extends Application {
 	public static final DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("yyyy-MM-dd");
 	public static final DateTimeFormatter TIME_FORMAT = DateTimeFormat.forPattern("HH:mm:ss");
 	public static final int MAX_TRACKER_SUBMIT = 10;
-	public static final boolean DEVELOPER_MODE = false;
+	public static final boolean DEVELOPER_MODE = true;
+	public static final String[] SUPPORTED_ACTIVITY_TYPES = {"page","quiz","resource","feedback"};
 	
 	// only used in case a course doesn't have any lang specified
 	public static final String DEFAULT_LANG = "en";

@@ -11,11 +11,11 @@ import org.digitalcampus.oppia.application.MobileLearning;
 import org.digitalcampus.oppia.exception.InvalidXMLException;
 import org.digitalcampus.oppia.listener.UpgradeListener;
 import org.digitalcampus.oppia.model.Course;
-import org.digitalcampus.oppia.utils.FileUtils;
 import org.digitalcampus.oppia.utils.CourseScheduleXMLReader;
 import org.digitalcampus.oppia.utils.CourseTrackerXMLReader;
 import org.digitalcampus.oppia.utils.CourseXMLReader;
 import org.nurhi.oppia.R;
+import org.digitalcampus.oppia.utils.FileUtils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -23,7 +23,6 @@ import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 public class UpgradeManagerTask extends AsyncTask<Payload, String, Payload> {
 	
@@ -100,7 +99,6 @@ public class UpgradeManagerTask extends AsyncTask<Payload, String, Payload> {
 		String[] children = dir.list();
 		if (children != null) {
 			for (int i = 0; i < children.length; i++) {
-				Log.d(TAG,"checking "+ children[i]);
 				publishProgress("checking: " + children[i]);
 				String courseXMLPath = "";
 				String courseScheduleXMLPath = "";

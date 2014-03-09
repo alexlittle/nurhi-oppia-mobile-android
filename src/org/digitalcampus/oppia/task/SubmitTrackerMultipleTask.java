@@ -28,7 +28,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.bugsense.trace.BugSenseHandler;
 
@@ -69,14 +68,9 @@ public class SubmitTrackerMultipleTask extends AsyncTask<Payload, Object, Payloa
                 httpPatch.setEntity(se);
                 
                 httpPatch.addHeader(client.getAuthHeader());
-
-                Log.d(TAG,url);
-				Log.d(TAG,dataToSend);
 				
                 // make request
 				HttpResponse response = client.execute(httpPatch);	
-				
-				Log.d(TAG,String.valueOf(response.getStatusLine().getStatusCode()));
 				
 				InputStream content = response.getEntity().getContent();
 				BufferedReader buffer = new BufferedReader(new InputStreamReader(content), 4096);
@@ -86,10 +80,7 @@ public class SubmitTrackerMultipleTask extends AsyncTask<Payload, Object, Payloa
 				while ((s = buffer.readLine()) != null) {
 					responseStr += s;
 				}
-				
-				Log.d(TAG,responseStr);
-				
-				
+
 				switch (response.getStatusLine().getStatusCode()){
 					case 200: // submitted
 						DbHelper dbh = new DbHelper(ctx);
@@ -106,6 +97,7 @@ public class SubmitTrackerMultipleTask extends AsyncTask<Payload, Object, Payloa
 						editor.putInt(ctx.getString(R.string.prefs_badges), jsonResp.getInt("badges"));
 						try {
 							editor.putBoolean(ctx.getString(R.string.prefs_scoring_enabled), jsonResp.getBoolean("scoring"));
+							editor.putBoolean(ctx.getString(R.string.prefs_badging_enabled), jsonResp.getBoolean("badging"));
 						} catch (JSONException e) {
 							e.printStackTrace();
 						}

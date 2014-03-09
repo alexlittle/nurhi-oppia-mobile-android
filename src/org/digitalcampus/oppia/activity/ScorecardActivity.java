@@ -19,14 +19,11 @@ package org.digitalcampus.oppia.activity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
-
-import org.digitalcampus.oppia.application.MobileLearning;
 import org.digitalcampus.oppia.adapter.ActivityPagerAdapter;
-import org.digitalcampus.oppia.fragments.AboutFragment;
-import org.digitalcampus.oppia.fragments.OppiaWebViewFragment;
-import org.digitalcampus.oppia.utils.FileUtils;
+import org.digitalcampus.oppia.fragments.BadgesFragment;
+import org.digitalcampus.oppia.fragments.PointsFragment;
+import org.digitalcampus.oppia.fragments.ScorecardFragment;
 import org.nurhi.oppia.R;
 
 import android.content.SharedPreferences;
@@ -41,9 +38,9 @@ import com.actionbarsherlock.app.ActionBar.Tab;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 
-public class AboutActivity extends SherlockFragmentActivity implements ActionBar.TabListener {
+public class ScorecardActivity extends SherlockFragmentActivity implements ActionBar.TabListener {
 
-	public static final String TAG = AboutActivity.class.getSimpleName();
+	public static final String TAG = ScorecardActivity.class.getSimpleName();
 	private ActionBar actionBar;
 	private ViewPager viewPager;
 	private ActivityPagerAdapter apAdapter;
@@ -54,14 +51,15 @@ public class AboutActivity extends SherlockFragmentActivity implements ActionBar
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.activity_about);
+		setContentView(R.layout.activity_scorecard);
 		actionBar = getSupportActionBar();
-		prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		viewPager = (ViewPager) findViewById(R.id.activity_about_pager);
+		viewPager = (ViewPager) findViewById(R.id.activity_scorecard_pager);
 		
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		actionBar.setHomeButtonEnabled(true);
+		
+		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 	}
 	
 	@Override
@@ -71,16 +69,23 @@ public class AboutActivity extends SherlockFragmentActivity implements ActionBar
 		actionBar.removeAllTabs();
 		List<Fragment> fragments = new ArrayList<Fragment>();
 		
-		Fragment fAbout = AboutFragment.newInstance();
-		fragments.add(fAbout);
-		actionBar.addTab(actionBar.newTab().setText(this.getString(R.string.tab_title_about)).setTabListener(this), true);
-
-		String lang = prefs.getString(getString(R.string.prefs_language), Locale.getDefault().getLanguage());
-		String url = FileUtils.getLocalizedFilePath(this,lang, "privacy.html");
-		Fragment fPrivacy = OppiaWebViewFragment.newInstance(url);
-		fragments.add(fPrivacy);
-		actionBar.addTab(actionBar.newTab().setText(this.getString(R.string.tab_title_privacy)).setTabListener(this), false);
-
+		Fragment fScorecard = ScorecardFragment.newInstance();
+		fragments.add(fScorecard);
+		actionBar.addTab(actionBar.newTab().setText(this.getString(R.string.tab_title_scorecard)).setTabListener(this), true);
+	
+		boolean scoringEnabled = prefs.getBoolean(this.getString(R.string.prefs_scoring_enabled), true);
+		if (scoringEnabled) {
+			Fragment fPoints = PointsFragment.newInstance();
+			fragments.add(fPoints);
+			actionBar.addTab(actionBar.newTab().setText(this.getString(R.string.tab_title_points)).setTabListener(this), false);
+		}
+		
+		boolean badgingEnabled = prefs.getBoolean(this.getString(R.string.prefs_badging_enabled), true);
+		if (badgingEnabled) {
+			Fragment fBadges= BadgesFragment.newInstance();
+			fragments.add(fBadges);
+			actionBar.addTab(actionBar.newTab().setText(this.getString(R.string.tab_title_badges)).setTabListener(this), false);
+		}
 		
 		apAdapter = new ActivityPagerAdapter(getSupportFragmentManager(), fragments);
 		viewPager.setAdapter(apAdapter);
