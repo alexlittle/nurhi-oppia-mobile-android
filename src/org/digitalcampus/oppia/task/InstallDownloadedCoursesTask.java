@@ -105,8 +105,6 @@ public class InstallDownloadedCoursesTask extends AsyncTask<Payload, DownloadPro
 					return payload;
 				}
 				
-				
-				//HashMap<String, String> hm = mxr.getMeta();
 				Course c = new Course();
 				c.setVersionId(cxr.getVersionId());
 				c.setTitles(cxr.getTitles());
@@ -115,6 +113,7 @@ public class InstallDownloadedCoursesTask extends AsyncTask<Payload, DownloadPro
 				c.setImageFile(MobileLearning.COURSES_PATH + courseDirs[0] + "/" + cxr.getCourseImage());
 				c.setLangs(cxr.getLangs());
 				c.setDescriptions(cxr.getDescriptions());
+				c.setPriority(cxr.getPriority());
 				String title = c.getTitle(prefs.getString(ctx.getString(R.string.prefs_language), Locale.getDefault().getLanguage()));
 				
 				dp.setMessage(ctx.getString(R.string.installing_course, title));

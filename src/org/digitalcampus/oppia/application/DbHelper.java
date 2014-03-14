@@ -43,7 +43,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	static final String TAG = DbHelper.class.getSimpleName();
 
 	static final String DB_NAME = "nurhi.db";
-	static final int DB_VERSION = 16;
+	static final int DB_VERSION = 17;
 
 	private SQLiteDatabase db;
 	
@@ -57,6 +57,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	private static final String COURSE_C_SCHEDULE = "schedule";
 	private static final String COURSE_C_IMAGE = "imagelink";
 	private static final String COURSE_C_LANGS = "langs";
+	private static final String COURSE_C_ORDER_PRIORITY = "orderpriority";
 	
 	private static final String ACTIVITY_TABLE = "Activity";
 	private static final String ACTIVITY_C_ID = BaseColumns._ID;
@@ -107,6 +108,7 @@ public class DbHelper extends SQLiteOpenHelper {
 				+ COURSE_C_SHORTNAME + " text," + COURSE_C_SCHEDULE + " int,"
 				+ COURSE_C_IMAGE + " text,"
 				+ COURSE_C_DESC + " text,"
+				+ COURSE_C_ORDER_PRIORITY + " integer default 0, " 
 				+ COURSE_C_LANGS + " text)";
 		db.execSQL(m_sql);
 	}
@@ -229,6 +231,11 @@ public class DbHelper extends SQLiteOpenHelper {
 			String sql = "ALTER TABLE " + COURSE_TABLE + " ADD COLUMN " + COURSE_C_DESC + " text null;";
 			db.execSQL(sql);
 		}
+		
+		if(oldVersion <= 16 && newVersion >= 17){
+			String sql = "ALTER TABLE " + COURSE_TABLE + " ADD COLUMN " + COURSE_C_ORDER_PRIORITY + " integer default 0;";
+			db.execSQL(sql);
+		}
 	}
 
 	public void onLogout(){
@@ -247,7 +254,8 @@ public class DbHelper extends SQLiteOpenHelper {
 		values.put(COURSE_C_LANGS, course.getLangsJSONString());
 		values.put(COURSE_C_IMAGE, course.getImageFile());
 		values.put(COURSE_C_DESC, course.getDescriptionJSONString());
-
+		values.put(COURSE_C_ORDER_PRIORITY, course.getPriority());
+		
 		if (!this.isInstalled(course.getShortname())) {
 			Log.v(TAG, "Record added");
 			return db.insertOrThrow(COURSE_TABLE, null, values);
@@ -275,6 +283,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		values.put(COURSE_C_SHORTNAME, course.getShortname());
 		values.put(COURSE_C_LANGS, course.getLangsJSONString());
 		values.put(COURSE_C_IMAGE, course.getImageFile());
+		values.put(COURSE_C_ORDER_PRIORITY, course.getPriority());
 		db.update(COURSE_TABLE, values, COURSE_C_ID + "=" + modId, null);
 		// remove all the old activities
 		String s = ACTIVITY_C_COURSEID + "=?";
@@ -351,7 +360,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	
 	public ArrayList<Course> getCourses() {
 		ArrayList<Course> courses = new ArrayList<Course>();
-		String order = COURSE_C_TITLE + " ASC";
+		String order = COURSE_C_ORDER_PRIORITY + " DESC, " + COURSE_C_TITLE + " ASC";
 		Cursor c = db.query(COURSE_TABLE, null, null, null, null, null, order);
 		c.moveToFirst();
 		while (c.isAfterLast() == false) {
@@ -364,6 +373,7 @@ public class DbHelper extends SQLiteOpenHelper {
 			course.setImageFile(c.getString(c.getColumnIndex(COURSE_C_IMAGE)));
 			course.setLangsFromJSONString(c.getString(c.getColumnIndex(COURSE_C_LANGS)));
 			course.setShortname(c.getString(c.getColumnIndex(COURSE_C_SHORTNAME)));
+			course.setPriority(c.getInt(c.getColumnIndex(COURSE_C_ORDER_PRIORITY)));
 			courses.add(course);
 			c.moveToNext();
 		}

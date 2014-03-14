@@ -21,26 +21,32 @@ import java.util.ArrayList;
 
 import org.digitalcampus.oppia.model.Tag;
 import org.nurhi.oppia.R;
+import org.digitalcampus.oppia.utils.lazylist.ImageLoader;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-public class TagListAdapter extends ArrayAdapter<Tag>{
+public class TagListAdapter extends ArrayAdapter<Tag> {
 
 	public static final String TAG = TagListAdapter.class.getSimpleName();
 	
 	private final Context ctx;
 	private final ArrayList<Tag> tagList;
+	private ImageView tagIcon;
+	public ImageLoader imageLoader; 
 	
 	public TagListAdapter(Activity context, ArrayList<Tag> tagList) {
 		super(context, R.layout.tag_row, tagList);
 		this.ctx = context;
 		this.tagList = tagList;
+		imageLoader=new ImageLoader(ctx);
 	}
 	
 	@Override
@@ -50,14 +56,29 @@ public class TagListAdapter extends ArrayAdapter<Tag>{
 	    View rowView = inflater.inflate(R.layout.tag_row, parent, false);
 	    Tag t = tagList.get(position);
 	    rowView.setTag(t);
+	    
 	    TextView tagName = (TextView) rowView.findViewById(R.id.tag_name);
 	    tagName.setText(ctx.getString(R.string.tag_label,t.getName(),t.getCount()));
+	    
+	    if(t.isHighlight()){
+	    	tagName.setTypeface(null, Typeface.BOLD);
+	    }
+	    
+	    if(t.getDescription() != null && !t.getDescription().trim().equals("") ){
+		    TextView tagDesc = (TextView) rowView.findViewById(R.id.tag_description);
+		    tagDesc.setText(t.getDescription());
+		    tagDesc.setVisibility(View.VISIBLE);
+	    }
+	    
+	    tagIcon = (ImageView) rowView.findViewById(R.id.tag_icon);
+	    if(t.getIcon() != null){
+	    	
+	    	
+	    	imageLoader.DisplayImage(t.getIcon(), tagIcon);
+	    	tagIcon.setVisibility(View.VISIBLE);
+
+	    }
 	    return rowView;
 	}
-	
-	public void closeDialogs(){
-		//if (myProgress != null){
-		//	myProgress.dismiss();
-		//}
-	}
 }
+
