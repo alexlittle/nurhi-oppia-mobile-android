@@ -25,8 +25,8 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.nurhi.oppia.R;
 
-import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -35,6 +35,7 @@ public class MobileLearning extends Application {
 
 	public static final String TAG = MobileLearning.class.getSimpleName();
 
+	
 	// local storage vars
 	public static final String OPPIAMOBILE_ROOT = Environment
 			.getExternalStorageDirectory() + "/digitalcampus/";
@@ -51,6 +52,7 @@ public class MobileLearning extends Application {
 	public static final String OPPIAMOBILE_API = "api/v1/";
 	public static final String LOGIN_PATH = OPPIAMOBILE_API + "user/";
 	public static final String REGISTER_PATH = OPPIAMOBILE_API + "register/";
+	public static final String RESET_PATH = OPPIAMOBILE_API + "reset/";
 	public static final String QUIZ_SUBMIT_PATH = OPPIAMOBILE_API + "quizattempt/";
 	public static final String SERVER_COURSES_PATH = OPPIAMOBILE_API + "course/";
 	public static final String SERVER_TAG_PATH = OPPIAMOBILE_API + "tag/";
@@ -61,11 +63,15 @@ public class MobileLearning extends Application {
 	
 	// general other settings
 	public static final String BUGSENSE_API_KEY = "56bea928";
+	public static final int DOWNLOAD_COURSES_DISPLAY = 1; //this no of courses must be displayed for the 'download more courses' option to disappear
 	public static final int PASSWORD_MIN_LENGTH = 6;
 	public static final int PAGE_READ_TIME = 3;
 	public static final int RESOURCE_READ_TIME = 3;
 	public static final String USER_AGENT = "NURHI Android: ";
-	public static final int QUIZ_PASS_THRESHOLD = 100;
+
+	public static final boolean DEFAULT_DISPLAY_COMPLETED = true;
+	public static final boolean DEFAULT_DISPLAY_PROGRESS_BAR = true;
+
 	public static final DateTimeFormatter DATETIME_FORMAT = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 	public static final DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("yyyy-MM-dd");
 	public static final DateTimeFormatter TIME_FORMAT = DateTimeFormat.forPattern("HH:mm:ss");
@@ -109,10 +115,10 @@ public class MobileLearning extends Application {
 		return true;
 	}
 	
-	public static boolean isLoggedIn(Activity act) {
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(act.getBaseContext());
-		String username = prefs.getString(act.getString(R.string.prefs_username), "");
-		String apiKey = prefs.getString(act.getString(R.string.prefs_api_key), "");
+	public static boolean isLoggedIn(Context ctx) {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+		String username = prefs.getString("prefUsername", "");
+		String apiKey = prefs.getString("prefApiKey", "");
 		if (username.trim().equals("") || apiKey.trim().equals("")) {
 			return false;
 		} else {

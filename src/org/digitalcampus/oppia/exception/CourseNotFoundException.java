@@ -17,6 +17,7 @@
 
 package org.digitalcampus.oppia.exception;
 
+import org.digitalcampus.oppia.application.DatabaseManager;
 import org.digitalcampus.oppia.application.DbHelper;
 
 import android.app.Activity;
@@ -29,7 +30,7 @@ public class CourseNotFoundException extends Exception {
 	public void deleteCourse(Activity act, int id){
 		DbHelper db = new DbHelper(act);
 		db.deleteCourse(id);
-		db.close();
+		DatabaseManager.getInstance().closeDatabase();
 	}
 
 }

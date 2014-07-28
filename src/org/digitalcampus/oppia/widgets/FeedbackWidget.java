@@ -27,7 +27,11 @@ import org.digitalcampus.mobile.quiz.Quiz;
 import org.digitalcampus.mobile.quiz.model.QuizQuestion;
 import org.digitalcampus.mobile.quiz.model.questiontypes.Essay;
 import org.digitalcampus.mobile.quiz.model.questiontypes.MultiChoice;
+import org.digitalcampus.mobile.quiz.model.questiontypes.MultiSelect;
+import org.digitalcampus.mobile.quiz.model.questiontypes.Numerical;
+import org.digitalcampus.mobile.quiz.model.questiontypes.ShortAnswer;
 import org.digitalcampus.oppia.activity.CourseActivity;
+import org.digitalcampus.oppia.application.DatabaseManager;
 import org.digitalcampus.oppia.application.DbHelper;
 import org.digitalcampus.oppia.application.Tracker;
 import org.digitalcampus.oppia.model.Activity;
@@ -35,7 +39,10 @@ import org.digitalcampus.oppia.model.Course;
 import org.digitalcampus.oppia.utils.MetaDataUtils;
 import org.digitalcampus.oppia.widgets.quiz.EssayWidget;
 import org.digitalcampus.oppia.widgets.quiz.MultiChoiceWidget;
+import org.digitalcampus.oppia.widgets.quiz.MultiSelectWidget;
+import org.digitalcampus.oppia.widgets.quiz.NumericalWidget;
 import org.digitalcampus.oppia.widgets.quiz.QuestionWidget;
+import org.digitalcampus.oppia.widgets.quiz.ShortAnswerWidget;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.nurhi.oppia.R;
@@ -94,7 +101,7 @@ public class FeedbackWidget extends WidgetFactory {
 		activity = ((Activity) getArguments().getSerializable(Activity.TAG));
 		this.setIsBaseline(getArguments().getBoolean(CourseActivity.BASELINE_TAG));
 		feedbackContent = ((Activity) getArguments().getSerializable(Activity.TAG)).getContents(prefs.getString(
-				super.getActivity().getString(R.string.prefs_language), Locale.getDefault().getLanguage()));
+				"prefLanguage", Locale.getDefault().getLanguage()));
 
 		LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 		vv.setLayoutParams(lp);
@@ -163,6 +170,12 @@ public class FeedbackWidget extends WidgetFactory {
 			qw = new MultiChoiceWidget(super.getActivity(), getView(), container);
 		} else if (q instanceof Essay) {
 			qw = new EssayWidget(super.getActivity(), getView(), container);
+		} else if (q instanceof ShortAnswer) {
+			qw = new ShortAnswerWidget(super.getActivity(), getView(), container);
+		} else if (q instanceof Numerical) {
+			qw = new NumericalWidget(super.getActivity(), getView(), container);
+		} else if (q instanceof MultiSelect) {
+			qw = new MultiSelectWidget(super.getActivity(), getView(), container);
 		} else {
 			return;
 		}
@@ -228,16 +241,16 @@ public class FeedbackWidget extends WidgetFactory {
 		// save results ready to send back to the quiz server
 		String data = feedback.getResultObject().toString();
 		DbHelper db = new DbHelper(super.getActivity());
-		db.insertQuizResult(data, course.getModId());
-		db.close();
-		
+		db.insertQuizResult(data, course.getCourseId());
+		DatabaseManager.getInstance().closeDatabase();
+
 		// load new layout
-		View C = getView().findViewById(R.id.quiz_progress);
-	    ViewGroup parent = (ViewGroup) C.getParent();
-	    int index = parent.indexOfChild(C);
-	    parent.removeView(C);
-	    C = super.getActivity().getLayoutInflater().inflate(R.layout.widget_feedback_results, parent, false);
-	    parent.addView(C, index);
+		View view = getView().findViewById(R.id.quiz_progress);
+	    ViewGroup parent = (ViewGroup) view.getParent();
+	    int index = parent.indexOfChild(view);
+	    parent.removeView(view);
+	    view = super.getActivity().getLayoutInflater().inflate(R.layout.widget_feedback_results, parent, false);
+	    parent.addView(view, index);
 
 	}
 	
@@ -286,11 +299,11 @@ public class FeedbackWidget extends WidgetFactory {
 			MetaDataUtils mdu = new MetaDataUtils(super.getActivity());
 			obj.put("timetaken", timetaken);
 			obj = mdu.getMetaData(obj);
-			String lang = prefs.getString(super.getActivity().getString(R.string.prefs_language), Locale.getDefault().getLanguage());
+			String lang = prefs.getString("prefLanguage", Locale.getDefault().getLanguage());
 			obj.put("lang", lang);
 			obj.put("quiz_id", feedback.getID());
 			obj.put("instance_id", feedback.getInstanceID());
-			t.saveTracker(course.getModId(), activity.getDigest(), obj, this.getActivityCompleted());
+			t.saveTracker(course.getCourseId(), activity.getDigest(), obj, this.getActivityCompleted());
 		} catch (JSONException e) {
 			// Do nothing
 		} catch (NullPointerException npe){

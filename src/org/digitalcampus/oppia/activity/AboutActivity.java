@@ -21,8 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-
-import org.digitalcampus.oppia.application.MobileLearning;
 import org.digitalcampus.oppia.adapter.ActivityPagerAdapter;
 import org.digitalcampus.oppia.fragments.AboutFragment;
 import org.digitalcampus.oppia.fragments.OppiaWebViewFragment;
@@ -44,6 +42,12 @@ import com.actionbarsherlock.view.MenuItem;
 public class AboutActivity extends SherlockFragmentActivity implements ActionBar.TabListener {
 
 	public static final String TAG = AboutActivity.class.getSimpleName();
+	
+	public static final String TAB_ACTIVE = "TAB_ACTIVE";
+	public static final int TAB_ABOUT = 0;
+	public static final int TAB_HELP = 1;
+	public static final int TAB_PRIVACY = 2;
+
 	private ActionBar actionBar;
 	private ViewPager viewPager;
 	private ActivityPagerAdapter apAdapter;
@@ -62,28 +66,56 @@ public class AboutActivity extends SherlockFragmentActivity implements ActionBar
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		actionBar.setHomeButtonEnabled(true);
+		
+		Bundle bundle = this.getIntent().getExtras();
+		if (bundle != null) {
+			currentTab = (Integer) bundle.getSerializable(AboutActivity.TAB_ACTIVE);
+		}
 	}
 	
 	@Override
 	public void onStart() {
 		super.onStart();
 
+		String lang = prefs.getString("prefLanguage", Locale.getDefault().getLanguage());
+		
 		actionBar.removeAllTabs();
 		List<Fragment> fragments = new ArrayList<Fragment>();
 		
 		Fragment fAbout = AboutFragment.newInstance();
 		fragments.add(fAbout);
-		actionBar.addTab(actionBar.newTab().setText(this.getString(R.string.tab_title_about)).setTabListener(this), true);
-
-		String lang = prefs.getString(getString(R.string.prefs_language), Locale.getDefault().getLanguage());
+		
+		String urlHelp = FileUtils.getLocalizedFilePath(this,lang, "help.html");
+		Fragment fHelp = OppiaWebViewFragment.newInstance(TAB_HELP, urlHelp);
+		fragments.add(fHelp);
+		
 		String url = FileUtils.getLocalizedFilePath(this,lang, "privacy.html");
-		Fragment fPrivacy = OppiaWebViewFragment.newInstance(url);
+		Fragment fPrivacy = OppiaWebViewFragment.newInstance(TAB_PRIVACY, url);
 		fragments.add(fPrivacy);
-		actionBar.addTab(actionBar.newTab().setText(this.getString(R.string.tab_title_privacy)).setTabListener(this), false);
-
+		
 		
 		apAdapter = new ActivityPagerAdapter(getSupportFragmentManager(), fragments);
 		viewPager.setAdapter(apAdapter);
+
+		boolean setSelected = false;
+		if (currentTab == AboutActivity.TAB_ABOUT){
+			setSelected = true;
+		} else {
+			setSelected = false;
+		}
+		actionBar.addTab(actionBar.newTab().setText(this.getString(R.string.tab_title_about)).setTabListener(this), TAB_ABOUT, setSelected);
+		if (currentTab == AboutActivity.TAB_HELP){
+			setSelected = true;
+		}else {
+			setSelected = false;
+		}
+		actionBar.addTab(actionBar.newTab().setText(this.getString(R.string.tab_title_help)).setTabListener(this), TAB_HELP, setSelected);
+		if (currentTab == AboutActivity.TAB_PRIVACY){
+			setSelected = true;
+		}else {
+			setSelected = false;
+		}
+		actionBar.addTab(actionBar.newTab().setText(this.getString(R.string.tab_title_privacy)).setTabListener(this), TAB_PRIVACY, setSelected);
 
 		viewPager.setCurrentItem(currentTab);
 		viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {

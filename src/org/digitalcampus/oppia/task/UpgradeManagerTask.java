@@ -1,3 +1,20 @@
+/* 
+ * This file is part of OppiaMobile - http://oppia-mobile.org/
+ * 
+ * OppiaMobile is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * OppiaMobile is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with OppiaMobile. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.digitalcampus.oppia.task;
 
 import java.io.File;
@@ -6,16 +23,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.digitalcampus.oppia.application.DatabaseManager;
 import org.digitalcampus.oppia.application.DbHelper;
 import org.digitalcampus.oppia.application.MobileLearning;
 import org.digitalcampus.oppia.exception.InvalidXMLException;
 import org.digitalcampus.oppia.listener.UpgradeListener;
 import org.digitalcampus.oppia.model.Course;
+import org.digitalcampus.oppia.model.User;
 import org.digitalcampus.oppia.utils.CourseScheduleXMLReader;
 import org.digitalcampus.oppia.utils.CourseTrackerXMLReader;
 import org.digitalcampus.oppia.utils.CourseXMLReader;
 import org.nurhi.oppia.R;
 import org.digitalcampus.oppia.utils.FileUtils;
+import org.digitalcampus.oppia.utils.SearchUtils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -47,7 +67,7 @@ public class UpgradeManagerTask extends AsyncTask<Payload, String, Payload> {
 			Editor editor = prefs.edit();
 			editor.putBoolean("upgradeV17", true);
 			editor.commit();
-			publishProgress("Upgraded to v17");
+			publishProgress(this.ctx.getString(R.string.info_upgrading,"v17"));
 			payload.setResult(true);
 		}
 		
@@ -56,7 +76,7 @@ public class UpgradeManagerTask extends AsyncTask<Payload, String, Payload> {
 			Editor editor = prefs.edit();
 			editor.putBoolean("upgradeV20", true);
 			editor.commit();
-			publishProgress("Upgraded to v20");
+			publishProgress(this.ctx.getString(R.string.info_upgrading,"v20"));
 			payload.setResult(true);
 		}
 		
@@ -64,7 +84,16 @@ public class UpgradeManagerTask extends AsyncTask<Payload, String, Payload> {
 			Editor editor = prefs.edit();
 			editor.putBoolean("upgradeV29", true);
 			editor.commit();
-			publishProgress("Upgraded to v29");
+			publishProgress(this.ctx.getString(R.string.info_upgrading,"v29"));
+			payload.setResult(true);
+		}
+		
+		if(!prefs.getBoolean("upgradeV43",false)){
+			upgradeV43();
+			Editor editor = prefs.edit();
+			editor.putBoolean("upgradeV43", true);
+			editor.commit();
+			publishProgress(this.ctx.getString(R.string.info_upgrading,"v43"));
 			payload.setResult(true);
 		}
 		
@@ -118,15 +147,14 @@ public class UpgradeManagerTask extends AsyncTask<Payload, String, Payload> {
 				CourseScheduleXMLReader csxr;
 				CourseTrackerXMLReader ctxr;
 				try {
-					cxr = new CourseXMLReader(courseXMLPath);
+					cxr = new CourseXMLReader(courseXMLPath,ctx);
 					csxr = new CourseScheduleXMLReader(courseScheduleXMLPath);
 					ctxr = new CourseTrackerXMLReader(courseTrackerXMLPath);
 				} catch (InvalidXMLException e) {
 					e.printStackTrace();
 					break;
 				}
-				
-				//HashMap<String, String> hm = mxr.getMeta();
+
 				Course c = new Course();
 				c.setVersionId(cxr.getVersionId());
 				c.setTitles(cxr.getTitles());
@@ -135,21 +163,20 @@ public class UpgradeManagerTask extends AsyncTask<Payload, String, Payload> {
 				c.setImageFile(MobileLearning.COURSES_PATH + children[i] + "/" + cxr.getCourseImage());
 				c.setLangs(cxr.getLangs());
 				
-				
 				DbHelper db = new DbHelper(ctx);
-				long modId = db.refreshCourse(c);
+				long courseId = db.addOrUpdateCourse(c);
 				
-				if (modId != -1) {
-					db.insertActivities(cxr.getActivities(modId));
-					db.insertTrackers(ctxr.getTrackers(),modId);
+				if (courseId != -1) {
+					db.insertActivities(cxr.getActivities(courseId));
+					db.insertTrackers(ctxr.getTrackers(),courseId);
 				} 
 				
 				// add schedule
 				// put this here so even if the course content isn't updated the schedule will be
 				db.insertSchedule(csxr.getSchedule());
-				db.updateScheduleVersion(modId, csxr.getScheduleVersion());
+				db.updateScheduleVersion(courseId, csxr.getScheduleVersion());
 				
-				db.close();
+				DatabaseManager.getInstance().closeDatabase();
 			}
 		}
 	}
@@ -158,7 +185,7 @@ public class UpgradeManagerTask extends AsyncTask<Payload, String, Payload> {
 	 */
 	protected void upgradeV20(){
 		Editor editor = prefs.edit();
-		editor.putString(ctx.getString(R.string.prefs_server), ctx.getString(R.string.prefServerDefault));
+		editor.putString("prefServer", ctx.getString(R.string.prefServerDefault));
 		editor.commit();
 	}
 	
@@ -207,6 +234,23 @@ public class UpgradeManagerTask extends AsyncTask<Payload, String, Payload> {
 		// delete the old directory
 		return FileUtils.deleteDir(dir);
 	}
+
+	/* go through and add html content to tables
+	 */
+	protected void upgradeV43(){
+		SearchUtils.reindexAll(ctx);
+		prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+		User user = new User();
+		user.setUsername(prefs.getString("prefUsername", ""));
+		user.setApiKey(prefs.getString("prefApiKey", "") );
+		DbHelper db = new DbHelper(ctx);
+		long userId = db.addOrUpdateUser(user);
+		db.updateV43(userId);
+		DatabaseManager.getInstance().closeDatabase();
+		
+	}
+	
+	
 	
 	@Override
 	protected void onProgressUpdate(String... obj) {

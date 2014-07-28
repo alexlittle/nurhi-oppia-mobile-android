@@ -17,10 +17,15 @@
 
 package org.digitalcampus.oppia.service;
 
+
+import java.util.ArrayList;
+
 import org.digitalcampus.oppia.activity.DownloadActivity;
+import org.digitalcampus.oppia.application.DatabaseManager;
 import org.digitalcampus.oppia.application.DbHelper;
 import org.digitalcampus.oppia.application.MobileLearning;
 import org.digitalcampus.oppia.listener.APIRequestListener;
+import org.digitalcampus.oppia.model.TrackerLog;
 import org.digitalcampus.oppia.task.APIRequestTask;
 import org.digitalcampus.oppia.task.Payload;
 import org.digitalcampus.oppia.task.SubmitQuizTask;
@@ -73,7 +78,7 @@ public class TrackerService extends Service implements APIRequestListener{
 		}
 
 		if (isOnline() && backgroundData) {
-			DbHelper db = new DbHelper(this);
+			
 			Payload p = null;
 			
 			// check for updated courses
@@ -95,18 +100,27 @@ public class TrackerService extends Service implements APIRequestListener{
 			// send activity trackers
 			MobileLearning app = (MobileLearning) this.getApplication();
 			if(app.omSubmitTrackerMultipleTask == null){
+				Log.d(TAG,"Sumitting trackers multiple task");
 				app.omSubmitTrackerMultipleTask = new SubmitTrackerMultipleTask(this);
 				app.omSubmitTrackerMultipleTask.execute();
 			}
 			
 			// send quiz results
 			if(app.omSubmitQuizTask == null){
-				Payload mqp = db.getUnsentQuizResults();
-				app.omSubmitQuizTask = new SubmitQuizTask(this);
-				app.omSubmitQuizTask.execute(mqp);
+				Log.d(TAG,"Sumitting quiz task");
+				DbHelper db = new DbHelper(this);
+				long userId = db.getUserId(prefs.getString("prefUsername", ""));
+				ArrayList<TrackerLog> unsent = db.getUnsentQuizResults(userId);
+				DatabaseManager.getInstance().closeDatabase();
+		
+				if (unsent.size() > 0){
+					p = new Payload(unsent);
+					app.omSubmitQuizTask = new SubmitQuizTask(this);
+					app.omSubmitQuizTask.execute(p);
+				}
 			}
 
-			db.close();
+			
 
 		}
 		return Service.START_NOT_STICKY;
@@ -134,16 +148,18 @@ public class TrackerService extends Service implements APIRequestListener{
 	}
 
 	public void apiRequestComplete(Payload response) {
-		DbHelper db = new DbHelper(this);
+		
 		
 		boolean updateAvailable = false;
 		try {
+			
 			JSONObject json = new JSONObject(response.getResultResponse());
 			Log.d(TAG,json.toString(4));
 			for (int i = 0; i < (json.getJSONArray("courses").length()); i++) {
 				JSONObject json_obj = (JSONObject) json.getJSONArray("courses").get(i);
 				String shortName = json_obj.getString("shortname");
 				Double version = json_obj.getDouble("version");
+				DbHelper db = new DbHelper(this);
 				if(db.toUpdate(shortName,version)){
 					updateAvailable = true;
 				}
@@ -153,11 +169,12 @@ public class TrackerService extends Service implements APIRequestListener{
 						updateAvailable = true;
 					}
 				}
+				DatabaseManager.getInstance().closeDatabase();
 			}
+			
 		} catch (JSONException e) {
 			e.printStackTrace();
-		}	
-		db.close();
+		} 
 		
 		if(updateAvailable){
 			Bitmap icon = BitmapFactory.decodeResource(getResources(),

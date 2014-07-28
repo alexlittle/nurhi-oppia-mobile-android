@@ -18,7 +18,6 @@
 package org.digitalcampus.oppia.widgets;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -33,12 +32,11 @@ import org.digitalcampus.mobile.quiz.model.questiontypes.MultiSelect;
 import org.digitalcampus.mobile.quiz.model.questiontypes.Numerical;
 import org.digitalcampus.mobile.quiz.model.questiontypes.ShortAnswer;
 import org.digitalcampus.oppia.activity.CourseActivity;
-import org.digitalcampus.oppia.adapter.QuizFeedbackAdapter;
+import org.digitalcampus.oppia.application.DatabaseManager;
 import org.digitalcampus.oppia.application.DbHelper;
 import org.digitalcampus.oppia.application.Tracker;
 import org.digitalcampus.oppia.model.Activity;
 import org.digitalcampus.oppia.model.Course;
-import org.digitalcampus.oppia.model.QuizFeedback;
 import org.digitalcampus.oppia.utils.MetaDataUtils;
 import org.digitalcampus.oppia.widgets.quiz.DescriptionWidget;
 import org.digitalcampus.oppia.widgets.quiz.MatchingWidget;
@@ -72,7 +70,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -115,7 +112,7 @@ public class QuizWidget extends WidgetFactory {
 		activity = ((Activity) getArguments().getSerializable(Activity.TAG));
 		this.setIsBaseline(getArguments().getBoolean(CourseActivity.BASELINE_TAG));
 		quizContent = ((Activity) getArguments().getSerializable(Activity.TAG)).getContents(prefs.getString(
-				super.getActivity().getString(R.string.prefs_language), Locale.getDefault().getLanguage()));
+				"prefLanguage", Locale.getDefault().getLanguage()));
 
 		LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 		vv.setLayoutParams(lp);
@@ -151,7 +148,45 @@ public class QuizWidget extends WidgetFactory {
 		if (this.isOnResultsPage) {
 			this.showResults();
 		} else {
-			this.showQuestion();
+			// determine availability
+			if (this.quiz.getAvailability() == Quiz.AVAILABILITY_ALWAYS){
+				this.showQuestion();
+			} else if (this.quiz.getAvailability() == Quiz.AVAILABILITY_SECTION){
+				
+				// check to see if all previous section activities have been completed
+				DbHelper db = new DbHelper(getView().getContext());
+				long userId = db.getUserId(prefs.getString("prefUsername", ""));
+				boolean completed = db.isPreviousSectionActivitiesCompleted(course, activity, userId);
+				DatabaseManager.getInstance().closeDatabase();
+				
+				if (completed){
+					this.showQuestion();
+				} else {
+					ViewGroup vg = (ViewGroup) getView().findViewById(activity.getActId());
+					vg.removeAllViews();
+					vg.addView(View.inflate(getView().getContext(), R.layout.widget_quiz_unavailable, null));
+					
+					TextView tv = (TextView) getView().findViewById(R.id.quiz_unavailable);
+					tv.setText(R.string.widget_quiz_unavailable_section);
+				}
+			} else if (this.quiz.getAvailability() == Quiz.AVAILABILITY_COURSE){
+				// check to see if all previous course activities have been completed
+				DbHelper db = new DbHelper(getView().getContext());
+				long userId = db.getUserId(prefs.getString("prefUsername", ""));
+				boolean completed = db.isPreviousCourseActivitiesCompleted(course, activity, userId);
+				DatabaseManager.getInstance().closeDatabase();
+				
+				if (completed){
+					this.showQuestion();
+				} else {
+					ViewGroup vg = (ViewGroup) getView().findViewById(activity.getActId());
+					vg.removeAllViews();
+					vg.addView(View.inflate(getView().getContext(), R.layout.widget_quiz_unavailable, null));
+					
+					TextView tv = (TextView) getView().findViewById(R.id.quiz_unavailable);
+					tv.setText(R.string.widget_quiz_unavailable_course);
+				}
+			}
 		}
 	}
 
@@ -186,15 +221,15 @@ public class QuizWidget extends WidgetFactory {
 		if (q instanceof MultiChoice) {
 			qw = new MultiChoiceWidget(super.getActivity(), getView(), container);
 		} else if (q instanceof MultiSelect) {
-			qw = new MultiSelectWidget(super.getActivity(), getView(),container);
+			qw = new MultiSelectWidget(super.getActivity(), getView(), container);
 		} else if (q instanceof ShortAnswer) {
-			qw = new ShortAnswerWidget(super.getActivity(), getView(),container);
+			qw = new ShortAnswerWidget(super.getActivity(), getView(), container);
 		} else if (q instanceof Matching) {
-			qw = new MatchingWidget(super.getActivity(), getView(),container);
+			qw = new MatchingWidget(super.getActivity(), getView(), container);
 		} else if (q instanceof Numerical) {
-			qw = new NumericalWidget(super.getActivity(), getView(),container);
+			qw = new NumericalWidget(super.getActivity(), getView(), container);
 		} else if (q instanceof Description) {
-			qw = new DescriptionWidget(super.getActivity(), getView(),container);
+			qw = new DescriptionWidget(super.getActivity(), getView(), container);
 		} else {
 			return;
 		}
@@ -232,7 +267,9 @@ public class QuizWidget extends WidgetFactory {
 					try {
 						feedback = QuizWidget.this.quiz.getCurrentQuestion().getFeedback();
 					
-						if (!feedback.equals("") && !isBaseline && !QuizWidget.this.quiz.getCurrentQuestion().getFeedbackDisplayed()) {
+						if (!feedback.equals("") && 
+								quiz.getShowFeedback() == Quiz.SHOW_FEEDBACK_ALWAYS 
+								&& !QuizWidget.this.quiz.getCurrentQuestion().getFeedbackDisplayed()) {
 							showFeedback(feedback);
 						} else if (QuizWidget.this.quiz.hasNext()) {
 							QuizWidget.this.quiz.moveNext();
@@ -294,6 +331,15 @@ public class QuizWidget extends WidgetFactory {
 		AlertDialog.Builder builder = new AlertDialog.Builder(super.getActivity());
 		builder.setTitle(super.getActivity().getString(R.string.feedback));
 		builder.setMessage(msg);
+		try {
+			if(this.quiz.getCurrentQuestion().getScoreAsPercent() >= Quiz.QUIZ_QUESTION_PASS_THRESHOLD){
+				builder.setIcon(R.drawable.quiz_tick);
+			} else {
+				builder.setIcon(R.drawable.quiz_cross);
+			}
+		} catch (InvalidQuizException e) {
+			e.printStackTrace();
+		}
 		builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 
 			public void onClick(DialogInterface arg0, int arg1) {
@@ -322,8 +368,9 @@ public class QuizWidget extends WidgetFactory {
 		// save results ready to send back to the quiz server
 		String data = quiz.getResultObject().toString();
 		DbHelper db = new DbHelper(super.getActivity());
-		db.insertQuizResult(data, course.getModId());
-		db.close();
+		db.insertQuizResult(data, course.getCourseId());
+		DatabaseManager.getInstance().closeDatabase();
+		
 		
 		// load new layout
 		View C = getView().findViewById(R.id.quiz_progress);
@@ -341,72 +388,17 @@ public class QuizWidget extends WidgetFactory {
 			baselineExtro.setVisibility(View.VISIBLE);
 			baselineExtro.setText(super.getActivity().getString(R.string.widget_quiz_baseline_completed));
 		} 
-		
-		// TODO add TextView here to give overall feedback if it's in the quiz
-		
-		// Show the detail of which questions were right/wrong
-		/*ListView questionFeedbackLV = (ListView) getView().findViewById(R.id.quiz_results_feedback);
-		ArrayList<QuizFeedback> quizFeedback = new ArrayList<QuizFeedback>();
-		List<QuizQuestion> questions = this.quiz.getQuestions();
-		for(QuizQuestion q: questions){
-			if(!(q instanceof Description)){
-				QuizFeedback qf = new QuizFeedback();
-				qf.setScore(q.getScoreAsPercent());
-				qf.setQuestionText(q.getTitle());
-				qf.setUserResponse(q.getUserResponses());
-				qf.setFeedbackText(q.getFeedback());
-				quizFeedback.add(qf);
-			}
-		}
-		QuizFeedbackAdapter qfa = new QuizFeedbackAdapter(super.getActivity(), quizFeedback);
-		questionFeedbackLV.setAdapter(qfa);*/
-		
-		// Show restart or continue button
-		/*Button restartBtn = (Button) getView().findViewById(R.id.quiz_results_button);
-		
-		if (this.isBaseline) {
-			restartBtn.setText(super.getActivity().getString(R.string.widget_quiz_baseline_goto_course));
-			restartBtn.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					QuizWidget.this.getActivity().finish();
-				}
-			});
-		} else {
-			restartBtn.setText(super.getActivity().getString(R.string.widget_quiz_results_restart));
-			restartBtn.setOnClickListener(new View.OnClickListener() {
-				public void onClick(View v) {
-					QuizWidget.this.restart();
-				}
-			});
-		}*/
-	}
-
-	private void restart() {
-		this.setStartTime(System.currentTimeMillis() / 1000);
-		
-		quiz = new Quiz();
-		quiz.load(quizContent);
-		isOnResultsPage = false;
-		
-		// reload quiz layout
-		View C = getView().findViewById(R.id.widget_quiz_results);
-	    ViewGroup parent = (ViewGroup) C.getParent();
-	    int index = parent.indexOfChild(C);
-	    parent.removeView(C);
-	    C = super.getActivity().getLayoutInflater().inflate(R.layout.widget_quiz, parent, false);
-	    parent.addView(C, index);
-	    
-	    prevBtn = (Button) getView().findViewById(R.id.mquiz_prev_btn);
-		nextBtn = (Button) getView().findViewById(R.id.mquiz_next_btn);
-		qText = (TextView) getView().findViewById(R.id.question_text);
-		questionImage = (LinearLayout) getView().findViewById(R.id.question_image);
-		questionImage.setVisibility(View.GONE);
-		this.showQuestion();
 	}
 
 	@Override
 	protected boolean getActivityCompleted() {
-		if (isOnResultsPage && this.getPercent() > 99) {
+		int passThreshold;
+		if (quiz.getPassThreshold() != 0){
+			passThreshold = quiz.getPassThreshold();
+		} else {
+			passThreshold = Quiz.QUIZ_DEFAULT_PASS_THRESHOLD;
+		}
+		if (isOnResultsPage && this.getPercent() >= passThreshold) {
 			return true;
 		} else {
 			return false;
@@ -426,16 +418,16 @@ public class QuizWidget extends WidgetFactory {
 			MetaDataUtils mdu = new MetaDataUtils(super.getActivity());
 			obj.put("timetaken", timetaken);
 			obj = mdu.getMetaData(obj);
-			String lang = prefs.getString(super.getActivity().getString(R.string.prefs_language), Locale.getDefault().getLanguage());
+			String lang = prefs.getString("prefLanguage", Locale.getDefault().getLanguage());
 			obj.put("lang", lang);
 			obj.put("quiz_id", quiz.getID());
 			obj.put("instance_id", quiz.getInstanceID());
 			obj.put("score", this.getPercent());
 			// if it's a baseline activity then assume completed
 			if (this.isBaseline) {
-				t.saveTracker(course.getModId(), activity.getDigest(), obj, true);
+				t.saveTracker(course.getCourseId(), activity.getDigest(), obj, true);
 			} else {
-				t.saveTracker(course.getModId(), activity.getDigest(), obj, this.getActivityCompleted());
+				t.saveTracker(course.getCourseId(), activity.getDigest(), obj, this.getActivityCompleted());
 			}
 		} catch (JSONException e) {
 			// Do nothing

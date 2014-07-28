@@ -32,11 +32,11 @@ public class HTTPConnectionUtils extends DefaultHttpClient {
 		this.httpParameters = new BasicHttpParams();
 		HttpConnectionParams.setConnectionTimeout(
 				httpParameters,
-				Integer.parseInt(prefs.getString(ctx.getString(R.string.prefs_server_timeout_connection),
+				Integer.parseInt(prefs.getString("prefServerTimeoutConnection",
 						ctx.getString(R.string.prefServerTimeoutConnectionDefault))));
 		HttpConnectionParams.setSoTimeout(
 				httpParameters,
-				Integer.parseInt(prefs.getString(ctx.getString(R.string.prefs_server_timeout_response),
+				Integer.parseInt(prefs.getString("prefServerTimeoutConnection",
 						ctx.getString(R.string.prefServerTimeoutResponseDefault))));
 		
 		// add user agent 
@@ -53,19 +53,23 @@ public class HTTPConnectionUtils extends DefaultHttpClient {
 	
 	public BasicHeader getAuthHeader(){
 		return new BasicHeader("Authorization","ApiKey " + 
-				prefs.getString(ctx.getString(R.string.prefs_username), "") + 
+				prefs.getString("prefUsername", "") + 
 				":" + 
-				prefs.getString(ctx.getString(R.string.prefs_api_key), ""));
+				prefs.getString("prefApiKey", ""));
+	}
+	
+	public BasicHeader getAuthHeader(String username, String apiKey){
+		return new BasicHeader("Authorization","ApiKey " + username + ":" + apiKey);
 	}
 	
 	public String getFullURL(String apiPath){
-		return prefs.getString(ctx.getString(R.string.prefs_server), ctx.getString(R.string.prefServerDefault)) + apiPath;
+		return prefs.getString("prefServer", ctx.getString(R.string.prefServerDefault)) + apiPath;
 	}
 
 	public String createUrlWithCredentials(String baseUrl){
 		List<NameValuePair> pairs = new LinkedList<NameValuePair>();
-		pairs.add(new BasicNameValuePair("username", prefs.getString(ctx.getString(R.string.prefs_username), "")));
-		pairs.add(new BasicNameValuePair("api_key", prefs.getString(ctx.getString(R.string.prefs_api_key), "")));
+		pairs.add(new BasicNameValuePair("username", prefs.getString("prefUsername", "")));
+		pairs.add(new BasicNameValuePair("api_key", prefs.getString("prefApiKey", "")));
 		pairs.add(new BasicNameValuePair("format", "json"));
 		String paramString = URLEncodedUtils.format(pairs, "utf-8");
 		if(!baseUrl.endsWith("?"))

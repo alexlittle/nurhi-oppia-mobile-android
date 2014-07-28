@@ -20,6 +20,7 @@ package org.digitalcampus.oppia.adapter;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import org.digitalcampus.oppia.application.DatabaseManager;
 import org.digitalcampus.oppia.application.DbHelper;
 import org.digitalcampus.oppia.model.Course;
 import org.nurhi.oppia.R;
@@ -55,16 +56,16 @@ public class ScheduleReminderListAdapter extends ArrayAdapter<org.digitalcampus.
 	    View rowView = inflater.inflate(R.layout.schedule_reminder_list_row, parent, false);
 	    org.digitalcampus.oppia.model.Activity a = activityList.get(position);
 	    DbHelper db = new DbHelper(ctx);
-		Course m = db.getCourse(a.getModId());
-		db.close();
-	    
-		String lang = prefs.getString(ctx.getString(R.string.prefs_language), Locale.getDefault().getLanguage());
+		long userId = db.getUserId(prefs.getString("prefUsername", ""));
+		Course course = db.getCourse(a.getCourseId(), userId);
+		DatabaseManager.getInstance().closeDatabase();
+		String lang = prefs.getString("prefLanguage", Locale.getDefault().getLanguage());
 		
 		TextView scheduleTitle = (TextView) rowView.findViewById(R.id.schedule_title);
-		scheduleTitle.setText(m.getTitle(lang) + ": " + a.getTitle(lang));
-		rowView.setTag(R.id.TAG_COURSE_ID,m);
+		scheduleTitle.setText(course.getTitle(lang) + ": " + a.getTitle(lang));
+		rowView.setTag(R.id.TAG_COURSE,course);
 		rowView.setTag(R.id.TAG_ACTIVITY_DIGEST,a.getDigest());
-
+		
 	    return rowView;
 	}
 

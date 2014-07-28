@@ -18,16 +18,21 @@
 package org.digitalcampus.oppia.model;
 
 import java.util.HashMap;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class User {
 
+	private int userid;
 	private String username;
 	private String email;
 	private String password;
 	private String passwordAgain;
+	private String passwordEncrypted;
 	private String firstname;
 	private String lastname;
-	private String api_key;
+	private String apiKey;
 	private HashMap<String,String> extraData = new HashMap<String,String>();
 	
 	private boolean scoringEnabled = true;
@@ -71,11 +76,11 @@ public class User {
 	public void setLastname(String lastname) {
 		this.lastname = lastname;
 	}
-	public String getApi_key() {
-		return api_key;
+	public String getApiKey() {
+		return apiKey;
 	}
-	public void setApi_key(String api_key) {
-		this.api_key = api_key;
+	public void setApiKey(String apiKey) {
+		this.apiKey = apiKey;
 	}
 	public String getDisplayName() {
 		return firstname + " " + lastname;
@@ -111,6 +116,30 @@ public class User {
 	
 	public void setBadgingEnabled(boolean badgingEnabled) {
 		this.badgingEnabled = badgingEnabled;
+	}
+	
+	public String getPasswordEncrypted() {
+		return this.passwordEncrypted;
+	}
+	
+	public void setPasswordEncrypted() {
+		try {
+			byte[] bytesOfMessage = this.password.getBytes("UTF-8");
+			MessageDigest md = MessageDigest.getInstance("SHA1");
+			this.passwordEncrypted = md.digest(bytesOfMessage).toString();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public int getUserid() {
+		return userid;
+	}
+	public void setUserid(int userid) {
+		this.userid = userid;
 	}
 
 	public String getExtraData(String key){

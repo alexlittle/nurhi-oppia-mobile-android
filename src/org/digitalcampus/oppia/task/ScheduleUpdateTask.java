@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
+import org.digitalcampus.oppia.application.DatabaseManager;
 import org.digitalcampus.oppia.application.DbHelper;
 import org.digitalcampus.oppia.application.MobileLearning;
 import org.digitalcampus.oppia.listener.UpdateScheduleListener;
@@ -113,7 +114,7 @@ public class ScheduleUpdateTask extends AsyncTask<Payload, DownloadProgress, Pay
 					db.resetSchedule(modId);
 					db.insertSchedule(activitySchedule);
 					db.updateScheduleVersion(modId, scheduleVersion);
-					db.close();
+					DatabaseManager.getInstance().closeDatabase();
 					break;
 				default:
 					payload.setResult(false);

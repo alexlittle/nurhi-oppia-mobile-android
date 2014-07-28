@@ -20,6 +20,7 @@ package org.digitalcampus.oppia.task;
 import java.io.File;
 import java.util.Locale;
 
+import org.digitalcampus.oppia.application.DatabaseManager;
 import org.digitalcampus.oppia.application.DbHelper;
 import org.digitalcampus.oppia.application.MobileLearning;
 import org.digitalcampus.oppia.exception.InvalidXMLException;
@@ -31,6 +32,7 @@ import org.digitalcampus.oppia.utils.CourseScheduleXMLReader;
 import org.digitalcampus.oppia.utils.CourseTrackerXMLReader;
 import org.digitalcampus.oppia.utils.CourseXMLReader;
 import org.nurhi.oppia.R;
+import org.digitalcampus.oppia.utils.SearchUtils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -96,7 +98,7 @@ public class InstallDownloadedCoursesTask extends AsyncTask<Payload, DownloadPro
 				CourseScheduleXMLReader csxr;
 				CourseTrackerXMLReader ctxr;
 				try {
-					cxr = new CourseXMLReader(courseXMLPath);
+					cxr = new CourseXMLReader(courseXMLPath,ctx);
 					csxr = new CourseScheduleXMLReader(courseScheduleXMLPath);
 					ctxr = new CourseTrackerXMLReader(courseTrackerXMLPath);
 				} catch (InvalidXMLException e) {
@@ -114,14 +116,15 @@ public class InstallDownloadedCoursesTask extends AsyncTask<Payload, DownloadPro
 				c.setLangs(cxr.getLangs());
 				c.setDescriptions(cxr.getDescriptions());
 				c.setPriority(cxr.getPriority());
-				String title = c.getTitle(prefs.getString(ctx.getString(R.string.prefs_language), Locale.getDefault().getLanguage()));
+				String title = c.getTitle(prefs.getString("prefLanguage", Locale.getDefault().getLanguage()));
 				
 				dp.setMessage(ctx.getString(R.string.installing_course, title));
 				publishProgress(dp);
 				
+				boolean success = false;
+				
 				DbHelper db = new DbHelper(ctx);
 				long added = db.addOrUpdateCourse(c);
-				
 				if (added != -1) {
 					payload.addResponseData(c);
 					File src = new File(tempdir + "/" + courseDirs[0]);
@@ -134,9 +137,10 @@ public class InstallDownloadedCoursesTask extends AsyncTask<Payload, DownloadPro
 					FileUtils.deleteDir(oldCourse);
 
 					// move from temp to courses dir
-					boolean success = src.renameTo(new File(dest, src.getName()));
+					success = src.renameTo(new File(dest, src.getName()));
 
 					if (success) {
+						// add the course to the search index
 						payload.setResult(true);
 						payload.setResultResponse(ctx.getString(R.string.install_course_complete, title));
 					} else {
@@ -151,10 +155,13 @@ public class InstallDownloadedCoursesTask extends AsyncTask<Payload, DownloadPro
 				// add schedule
 				// put this here so even if the course content isn't updated the schedule will be
 				db.insertSchedule(csxr.getSchedule());
-				db.updateScheduleVersion(added, csxr.getScheduleVersion());
+				db.updateScheduleVersion(added, csxr.getScheduleVersion());				
+				DatabaseManager.getInstance().closeDatabase();
 				
+				if (success){
+					SearchUtils.indexAddCourse(this.ctx, c);
+				}
 				
-				db.close();
 				// delete temp directory
 				FileUtils.deleteDir(tempdir);
 

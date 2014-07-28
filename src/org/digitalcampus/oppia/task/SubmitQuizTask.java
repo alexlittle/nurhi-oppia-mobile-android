@@ -29,6 +29,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
+
+import org.digitalcampus.oppia.application.DatabaseManager;
 import org.digitalcampus.oppia.application.DbHelper;
 import org.digitalcampus.oppia.application.MobileLearning;
 import org.digitalcampus.oppia.model.TrackerLog;
@@ -50,7 +52,7 @@ public class SubmitQuizTask extends AsyncTask<Payload, Object, Payload> {
 	public final static String TAG = SubmitQuizTask.class.getSimpleName();
 	private Context ctx;
 	private SharedPreferences prefs;
-
+	
 	public SubmitQuizTask(Context c) {
 		this.ctx = c;
 		prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
@@ -62,6 +64,7 @@ public class SubmitQuizTask extends AsyncTask<Payload, Object, Payload> {
 		for (Object l : payload.getData()) {
 			TrackerLog tl = (TrackerLog) l;
 			HTTPConnectionUtils client = new HTTPConnectionUtils(ctx);
+			
 			try {
 
 				String url = client.getFullURL(MobileLearning.QUIZ_SUBMIT_PATH);
@@ -80,40 +83,39 @@ public class SubmitQuizTask extends AsyncTask<Payload, Object, Payload> {
 				while ((s = buffer.readLine()) != null) {
 					responseStr += s;
 				}
-
+				
 				switch (response.getStatusLine().getStatusCode()) {
-				case 201: // submitted
-					DbHelper db = new DbHelper(ctx);
-					db.markQuizSubmitted(tl.getId());
-					db.close();
-					payload.setResult(true);
-					// update points
-					JSONObject jsonResp = new JSONObject(responseStr);
-					Editor editor = prefs.edit();
-					editor.putInt(ctx.getString(R.string.prefs_points), jsonResp.getInt("points"));
-					editor.putInt(ctx.getString(R.string.prefs_badges), jsonResp.getInt("badges"));
-					editor.commit();
-					break;
-				case 400: // bad request - so to prevent re-submitting over and
-							// over
-							// just mark as submitted
-					DbHelper dba = new DbHelper(ctx);
-					dba.markQuizSubmitted(tl.getId());
-					dba.close();
-					payload.setResult(false);
-					break;
-				case 500: // bad request - so to prevent re-submitting over and
-							// over
-					// just mark as submitted
-					DbHelper dbb = new DbHelper(ctx);
-					dbb.markQuizSubmitted(tl.getId());
-					dbb.close();
-					payload.setResult(false);
-					break;
-				default:
-					payload.setResult(false);
+					case 201: // submitted
+						DbHelper db = new DbHelper(ctx);
+						db.markQuizSubmitted(tl.getId());
+						DatabaseManager.getInstance().closeDatabase();
+						payload.setResult(true);
+						// update points
+						JSONObject jsonResp = new JSONObject(responseStr);
+						Editor editor = prefs.edit();
+						editor.putInt("prefPoints", jsonResp.getInt("points"));
+						editor.putInt("prefBadges", jsonResp.getInt("badges"));
+						editor.commit();
+						break;
+					case 400: // bad request - so to prevent re-submitting over and
+								// over
+								// just mark as submitted
+						DbHelper db2 = new DbHelper(ctx);
+						db2.markQuizSubmitted(tl.getId());
+						DatabaseManager.getInstance().closeDatabase();
+						payload.setResult(false);
+						break;
+					case 500: // bad request - so to prevent re-submitting over and
+								// over
+						// just mark as submitted
+						DbHelper db3 = new DbHelper(ctx);
+						db3.markQuizSubmitted(tl.getId());
+						DatabaseManager.getInstance().closeDatabase();
+						payload.setResult(false);
+						break;
+					default:
+						payload.setResult(false);
 				}
-
 			} catch (UnsupportedEncodingException e) {
 				payload.setResult(false);
 				publishProgress(ctx.getString(R.string.error_connection));
@@ -130,8 +132,7 @@ public class SubmitQuizTask extends AsyncTask<Payload, Object, Payload> {
 				} else {
 					e.printStackTrace();
 				}
-			}
-
+			} 
 		}
 
 		return payload;

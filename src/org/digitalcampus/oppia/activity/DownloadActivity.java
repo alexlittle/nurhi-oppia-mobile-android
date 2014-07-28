@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.concurrent.Callable;
 
 import org.digitalcampus.oppia.adapter.DownloadCourseListAdapter;
+import org.digitalcampus.oppia.application.DatabaseManager;
 import org.digitalcampus.oppia.application.DbHelper;
 import org.digitalcampus.oppia.application.MobileLearning;
 import org.digitalcampus.oppia.listener.APIRequestListener;
@@ -50,6 +51,7 @@ public class DownloadActivity extends AppActivity implements APIRequestListener 
 	private DownloadCourseListAdapter dla;
 	private String url;
 	private ArrayList<Course> courses;
+	private boolean showUpdatesOnly = false;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -61,9 +63,10 @@ public class DownloadActivity extends AppActivity implements APIRequestListener 
 		Bundle bundle = this.getIntent().getExtras(); 
         if(bundle != null) {
         	Tag t = (Tag) bundle.getSerializable(Tag.TAG);
-        	url = MobileLearning.SERVER_TAG_PATH + String.valueOf(t.getId()) + "/";
+        	this.url = MobileLearning.SERVER_TAG_PATH + String.valueOf(t.getId()) + "/";
         } else {
-        	url = MobileLearning.SERVER_COURSES_PATH;
+        	this.url = MobileLearning.SERVER_COURSES_PATH;
+        	this.showUpdatesOnly = true;
         }        	
 	}
 	
@@ -151,14 +154,20 @@ public class DownloadActivity extends AppActivity implements APIRequestListener 
 		        
 		        ArrayList<Lang> descriptions = new ArrayList<Lang>();
 		        if (json_obj.has("description") && !json_obj.isNull("description")){
-					JSONObject jsonDescriptions = json_obj.getJSONObject("description");
-					Iterator<?> dkeys = jsonDescriptions.keys();
-			        while( dkeys.hasNext() ){
-			            String key = (String) dkeys.next();
-			            Lang l = new Lang(key,jsonDescriptions.getString(key));
-			            descriptions.add(l);
-			        }
-			        dc.setDescriptions(descriptions);
+		        	try {
+						JSONObject jsonDescriptions = json_obj.getJSONObject("description");
+						Iterator<?> dkeys = jsonDescriptions.keys();
+				        while( dkeys.hasNext() ){
+				            String key = (String) dkeys.next();
+				            if (!jsonDescriptions.isNull(key)){
+					            Lang l = new Lang(key,jsonDescriptions.getString(key));
+					            descriptions.add(l);
+				            }
+				        }
+				        dc.setDescriptions(descriptions);
+		        	} catch (JSONException jsone){
+		        		//do nothing
+		        	}
 		        }
 		        
 		        dc.setShortname(json_obj.getString("shortname"));
@@ -176,7 +185,9 @@ public class DownloadActivity extends AppActivity implements APIRequestListener 
 					dc.setScheduleURI(json_obj.getString("schedule_uri"));
 					dc.setToUpdateSchedule(db.toUpdateSchedule(dc.getShortname(), dc.getScheduleVersionID()));
 				}
-				this.courses.add(dc);
+				if (!this.showUpdatesOnly || dc.isToUpdate()){
+					this.courses.add(dc);
+				} 
 			}
 			
 			dla = new DownloadCourseListAdapter(this, courses);
@@ -192,7 +203,7 @@ public class DownloadActivity extends AppActivity implements APIRequestListener 
 			}
 			UIUtils.showAlert(this, R.string.loading, R.string.error_processing_response);
 		}
-		db.close();
+		DatabaseManager.getInstance().closeDatabase();
 
 	}
 	

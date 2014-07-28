@@ -109,7 +109,7 @@ public class CourseActivity extends SherlockFragmentActivity implements ActionBa
 	@Override
 	public void onStart() {
 		super.onStart();
-		String actionBarTitle = section.getTitle(prefs.getString(getString(R.string.prefs_language), Locale
+		String actionBarTitle = section.getTitle(prefs.getString("prefLanguage", Locale
 				.getDefault().getLanguage()));
 		if (actionBarTitle != null) {
 			setTitle(actionBarTitle);
@@ -140,7 +140,7 @@ public class CourseActivity extends SherlockFragmentActivity implements ActionBa
 
 		for (int i = 0; i < activities.size(); i++) {
 			String title = activities.get(i).getTitle(
-					prefs.getString(getString(R.string.prefs_language), Locale.getDefault().getLanguage()));
+					prefs.getString("prefLanguage", Locale.getDefault().getLanguage()));
 			boolean tabSelected = false;
 			if (i == currentActivityNo) {
 				tabSelected = true;
@@ -222,7 +222,11 @@ public class CourseActivity extends SherlockFragmentActivity implements ActionBa
 			createLanguageDialog();
 			return true;
 		case R.id.menu_help:
-			startActivity(new Intent(this, HelpActivity.class));
+			Bundle tb = new Bundle();
+			Intent i = new Intent(this, AboutActivity.class);
+			tb.putSerializable(AboutActivity.TAB_ACTIVE, AboutActivity.TAB_HELP);
+			i.putExtras(tb);
+			startActivity(i);
 			return true;
 		case android.R.id.home:
 			this.finish();

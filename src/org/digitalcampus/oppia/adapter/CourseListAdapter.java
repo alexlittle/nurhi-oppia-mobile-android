@@ -20,6 +20,7 @@ package org.digitalcampus.oppia.adapter;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import org.digitalcampus.oppia.application.MobileLearning;
 import org.digitalcampus.oppia.model.Course;
 import org.digitalcampus.oppia.utils.ImageUtils;
 import org.nurhi.oppia.R;
@@ -61,10 +62,17 @@ public class CourseListAdapter extends ArrayAdapter<Course> {
 	    rowView.setTag(c);
 	    
 	    TextView courseTitle = (TextView) rowView.findViewById(R.id.course_title);
-	    courseTitle.setText(c.getTitle(prefs.getString(ctx.getString(R.string.prefs_language), Locale.getDefault().getLanguage())));
+	    courseTitle.setText(c.getTitle(prefs.getString("prefLanguage", Locale.getDefault().getLanguage())));
+	    
+	    TextView courseDescription = (TextView) rowView.findViewById(R.id.course_description);
+	    courseDescription.setText(c.getDescription(prefs.getString("prefLanguage", Locale.getDefault().getLanguage())));
 	    
 	    ProgressBar pb = (ProgressBar) rowView.findViewById(R.id.course_progress_bar);
-	    pb.setProgress((int) c.getProgress());
+	    if (prefs.getBoolean("prefShowProgressBar", MobileLearning.DEFAULT_DISPLAY_PROGRESS_BAR)){
+	    	pb.setProgress((int) c.getProgress());
+	    } else {
+	    	pb.setVisibility(View.GONE);
+	    }
 	    
 		// set image
 		if(c.getImageFile() != null){

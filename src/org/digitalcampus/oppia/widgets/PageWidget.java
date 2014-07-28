@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.digitalcampus.oppia.activity.CourseActivity;
+import org.digitalcampus.oppia.application.DatabaseManager;
 import org.digitalcampus.oppia.application.DbHelper;
 import org.digitalcampus.oppia.application.MobileLearning;
 import org.digitalcampus.oppia.application.Tracker;
@@ -85,7 +86,7 @@ public class PageWidget extends WidgetFactory {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		prefs = PreferenceManager.getDefaultSharedPreferences(super.getActivity());
-		View vv = super.getLayoutInflater(savedInstanceState).inflate(R.layout.widget_page, null);
+		View vv = super.getLayoutInflater(savedInstanceState).inflate(R.layout.fragment_webview, null);
 		LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 		vv.setLayoutParams(lp);
 		activity = (Activity) getArguments().getSerializable(Activity.TAG);
@@ -110,9 +111,10 @@ public class PageWidget extends WidgetFactory {
 		wv = (WebView) super.getActivity().findViewById(activity.getActId());
 		// get the location data
 		String url = course.getLocation()
-				+ activity.getLocation(prefs.getString(super.getActivity().getString(R.string.prefs_language), Locale.getDefault()
+				+ activity.getLocation(prefs.getString("prefLanguage", Locale.getDefault()
 						.getLanguage()));
 		try {
+			wv.getSettings().setJavaScriptEnabled(true);
 			wv.loadDataWithBaseURL("file://" + course.getLocation() + "/", FileUtils.readFile(url), "text/html",
 					"utf-8", null);
 		} catch (IOException e) {
@@ -206,17 +208,17 @@ public class PageWidget extends WidgetFactory {
 			ArrayList<Media> mediaList = this.activity.getMedia();
 			boolean completed = true;
 			DbHelper db = new DbHelper(super.getActivity());
+			long userId = db.getUserId(prefs.getString("prefUsername", ""));
 			for (Media m : mediaList) {
-				if (!db.activityCompleted(this.course.getModId(), m.getDigest())) {
+				if (!db.activityCompleted(this.course.getCourseId(), m.getDigest(), userId)) {
 					completed = false;
 				}
 			}
-			db.close();
-			if (!completed) {
-				return false;
-			}
+			DatabaseManager.getInstance().closeDatabase();
+			return completed;
+		} else {
+			return true;
 		}
-		return true;
 	}
 
 	public void saveTracker() {
@@ -233,14 +235,14 @@ public class PageWidget extends WidgetFactory {
 			MetaDataUtils mdu = new MetaDataUtils(super.getActivity());
 			obj.put("timetaken", timetaken);
 			obj = mdu.getMetaData(obj);
-			String lang = prefs.getString(super.getActivity().getString(R.string.prefs_language), Locale.getDefault().getLanguage());
+			String lang = prefs.getString("prefLanguage", Locale.getDefault().getLanguage());
 			obj.put("lang", lang);
 			obj.put("readaloud", readAloud);
 			// if it's a baseline activity then assume completed
 			if (this.isBaseline) {
-				t.saveTracker(course.getModId(), activity.getDigest(), obj, true);
+				t.saveTracker(course.getCourseId(), activity.getDigest(), obj, true);
 			} else {
-				t.saveTracker(course.getModId(), activity.getDigest(), obj, this.getActivityCompleted());
+				t.saveTracker(course.getCourseId(), activity.getDigest(), obj, this.getActivityCompleted());
 			}
 		} catch (JSONException e) {
 			// Do nothing
@@ -270,7 +272,7 @@ public class PageWidget extends WidgetFactory {
 						data.put("media", "played");
 						data.put("mediafile", mediaFileName);
 						data.put("timetaken", timeTaken);
-						String lang = prefs.getString(super.getActivity().getString(R.string.prefs_language), Locale.getDefault()
+						String lang = prefs.getString("prefLanguage", Locale.getDefault()
 								.getLanguage());
 						data.put("lang", lang);
 					} catch (JSONException e) {
@@ -287,7 +289,7 @@ public class PageWidget extends WidgetFactory {
 					} catch (JSONException e) {
 						// Do nothing
 					}
-					t.saveTracker(PageWidget.this.course.getModId(), m.getDigest(), data, completed);
+					t.saveTracker(PageWidget.this.course.getCourseId(), m.getDigest(), data, completed);
 				}
 			}
 		}
@@ -356,7 +358,7 @@ public class PageWidget extends WidgetFactory {
 		File f = new File("/"
 				+ course.getLocation()
 				+ "/"
-				+ activity.getLocation(prefs.getString(super.getActivity().getString(R.string.prefs_language), Locale.getDefault()
+				+ activity.getLocation(prefs.getString("prefLanguage", Locale.getDefault()
 						.getLanguage())));
 		StringBuilder text = new StringBuilder();
 		try {

@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import org.digitalcampus.oppia.activity.CourseActivity;
+import org.digitalcampus.oppia.application.MobileLearning;
 import org.digitalcampus.oppia.model.Course;
 import org.digitalcampus.oppia.model.Section;
 import org.nurhi.oppia.R;
@@ -38,7 +39,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class SectionListAdapter extends ArrayAdapter<Section> {
@@ -67,14 +67,11 @@ public class SectionListAdapter extends ArrayAdapter<Section> {
 	    
 	    Section s = sectionList.get(position);
 	    String title = "";
-	    if(prefs.getBoolean(ctx.getString(R.string.prefs_section_numbers_show), false)){
+	    if(prefs.getBoolean("prefShowSectionNumbers", false)){
 	    	title += String.valueOf(s.getOrder()) + ". ";
 	    }
-	    title += s.getTitle(prefs.getString(ctx.getString(R.string.prefs_language), Locale.getDefault().getLanguage()));
+	    title += s.getTitle(prefs.getString("prefLanguage", Locale.getDefault().getLanguage()));
 	    sectionTitle.setText(title);
-	    
-	    ProgressBar pb = (ProgressBar) rowView.findViewById(R.id.section_progress_bar);
-	    pb.setProgress((int) s.getProgress());
 	    
 	    rowView.setTag(sectionList.get(position));
 	   
@@ -87,7 +84,7 @@ public class SectionListAdapter extends ArrayAdapter<Section> {
 		    ll.addView(horizRowItem);
 		    
 		    TextView tv = (TextView) horizRowItem.findViewById(R.id.activity_title);
-		    tv.setText(s.getActivities().get(i).getTitle(prefs.getString(ctx.getString(R.string.prefs_language), Locale.getDefault().getLanguage())));
+		    tv.setText(s.getActivities().get(i).getTitle(prefs.getString("prefLanguage", Locale.getDefault().getLanguage())));
 		    
 		    // set image
 		    ImageView iv = (ImageView) horizRowItem.findViewById(R.id.activity_image);
@@ -100,7 +97,7 @@ public class SectionListAdapter extends ArrayAdapter<Section> {
 	    	LinearLayout activityObject = (LinearLayout) horizRowItem.findViewById(R.id.activity_object);
 	    	
 	    	// highlight if completed
-	    	if(s.getActivities().get(i).getCompleted() && prefs.getBoolean(ctx.getString(R.string.prefs_highlightCompleted), true)){
+	    	if(s.getActivities().get(i).getCompleted() && prefs.getBoolean("prefHighlightCompleted", MobileLearning.DEFAULT_DISPLAY_COMPLETED)){
 	    		activityObject.setBackgroundResource(R.drawable.activity_background_completed);
 	    	}
 	    	

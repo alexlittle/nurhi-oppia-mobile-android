@@ -70,7 +70,7 @@ public class DownloadCourseListAdapter extends ArrayAdapter<Course> implements I
 	    rowView.setTag(c);
 	    
 	    TextView courseTitle = (TextView) rowView.findViewById(R.id.course_title);
-	    courseTitle.setText(c.getTitle(prefs.getString(ctx.getString(R.string.prefs_language), Locale.getDefault().getLanguage())));
+	    courseTitle.setText(c.getTitle(prefs.getString("prefLanguage", Locale.getDefault().getLanguage())));
 	    
 	    TextView courseDraft = (TextView) rowView.findViewById(R.id.course_draft);
 	    if (c.isDraft()){
@@ -80,14 +80,14 @@ public class DownloadCourseListAdapter extends ArrayAdapter<Course> implements I
 	    }
 	    
 	    TextView courseDesc = (TextView) rowView.findViewById(R.id.course_description);
-	    String desc = c.getDescription(prefs.getString(ctx.getString(R.string.prefs_language), Locale.getDefault().getLanguage()));
+	    String desc = c.getDescription(prefs.getString("prefLanguage", Locale.getDefault().getLanguage()));
 	    if (desc != null){
 	    	courseDesc.setText(desc);
 	    } else {
 	    	courseDesc.setVisibility(View.GONE);
 	    }
 
-	    Button actionBtn = (Button) rowView.findViewById(R.id.action_btn);
+	    Button actionBtn = (Button) rowView.findViewById(R.id.download_course_btn);
 	    
 	    if(c.isInstalled()){
 	    	if(c.isToUpdate()){
@@ -166,7 +166,7 @@ public class DownloadCourseListAdapter extends ArrayAdapter<Course> implements I
 		
 		if(p.isResult()){
 			Editor e = prefs.edit();
-			e.putLong(ctx.getString(R.string.prefs_last_media_scan), 0);
+			e.putLong("prefLastMediaScan", 0);
 			e.commit();
 			downloadDialog.setTitle(ctx.getString(R.string.install_complete));	
 			downloadDialog.setMessage(p.getResultResponse());
@@ -211,7 +211,7 @@ public class DownloadCourseListAdapter extends ArrayAdapter<Course> implements I
 			DownloadActivity da = (DownloadActivity) ctx;
 			da.refreshCourseList();
 			Editor e = prefs.edit();
-			e.putLong(ctx.getString(R.string.prefs_last_media_scan), 0);
+			e.putLong("prefLastMediaScan", 0);
 			e.commit();
 		} else {
 			downloadDialog.setTitle(ctx.getString(R.string.error_update_failure));	

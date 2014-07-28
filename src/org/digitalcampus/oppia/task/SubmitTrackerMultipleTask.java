@@ -1,3 +1,20 @@
+/* 
+ * This file is part of OppiaMobile - http://oppia-mobile.org/
+ * 
+ * OppiaMobile is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * OppiaMobile is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with OppiaMobile. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.digitalcampus.oppia.task;
 
 import java.io.BufferedReader;
@@ -14,6 +31,8 @@ import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
+
+import org.digitalcampus.oppia.application.DatabaseManager;
 import org.digitalcampus.oppia.application.DbHelper;
 import org.digitalcampus.oppia.application.MobileLearning;
 import org.digitalcampus.oppia.model.TrackerLog;
@@ -28,6 +47,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.bugsense.trace.BugSenseHandler;
 
@@ -45,101 +65,111 @@ public class SubmitTrackerMultipleTask extends AsyncTask<Payload, Object, Payloa
 
 	@Override
 	protected Payload doInBackground(Payload... params) {
-		DbHelper db = new DbHelper(ctx);
-		Payload payload = db.getUnsentLog();
-		db.close();
+		Payload payload = new Payload();
 		
-		@SuppressWarnings("unchecked")
-		Collection<Collection<TrackerLog>> result = (Collection<Collection<TrackerLog>>) split((Collection<Object>) payload.getData(), MobileLearning.MAX_TRACKER_SUBMIT);
-		
-		HTTPConnectionUtils client = new HTTPConnectionUtils(ctx);
-		
-		String url =client.getFullURL(MobileLearning.TRACKER_PATH);
-		
-		HttpPatch httpPatch = new HttpPatch(url);
-		
-		for (Collection<TrackerLog> trackerBatch : result) {
-			String dataToSend = createDataString(trackerBatch);
-			
-			try {
-
-				StringEntity se = new StringEntity(dataToSend,"utf8");
-                se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
-                httpPatch.setEntity(se);
-                
-                httpPatch.addHeader(client.getAuthHeader());
+		try {
 				
-                // make request
-				HttpResponse response = client.execute(httpPatch);	
+				DbHelper db = new DbHelper(ctx);
+				long userId = db.getUserId(prefs.getString("prefUsername", ""));
+				Log.d(TAG,"userId: " + userId);
+				payload = db.getUnsentTrackers(userId);
+				DatabaseManager.getInstance().closeDatabase();
+				@SuppressWarnings("unchecked")
+				Collection<Collection<TrackerLog>> result = (Collection<Collection<TrackerLog>>) split((Collection<Object>) payload.getData(), MobileLearning.MAX_TRACKER_SUBMIT);
 				
-				InputStream content = response.getEntity().getContent();
-				BufferedReader buffer = new BufferedReader(new InputStreamReader(content), 4096);
-				String responseStr = "";
-				String s = "";
-
-				while ((s = buffer.readLine()) != null) {
-					responseStr += s;
-				}
-
-				switch (response.getStatusLine().getStatusCode()){
-					case 200: // submitted
-						DbHelper dbh = new DbHelper(ctx);
-						for(TrackerLog tl: trackerBatch){
-							dbh.markLogSubmitted(tl.getId());
-						}
-						dbh.close();
-						payload.setResult(true);
-						// update points
-						JSONObject jsonResp = new JSONObject(responseStr);
-						Editor editor = prefs.edit();
+				HTTPConnectionUtils client = new HTTPConnectionUtils(ctx);
+				
+				String url =client.getFullURL(MobileLearning.TRACKER_PATH);
+				
+				HttpPatch httpPatch = new HttpPatch(url);
+				
+				for (Collection<TrackerLog> trackerBatch : result) {
+					String dataToSend = createDataString(trackerBatch);
+					
+					try {
+		
+						StringEntity se = new StringEntity(dataToSend,"utf8");
+		                se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+		                httpPatch.setEntity(se);
+		                
+		                httpPatch.addHeader(client.getAuthHeader());
 						
-						editor.putInt(ctx.getString(R.string.prefs_points), jsonResp.getInt("points"));
-						editor.putInt(ctx.getString(R.string.prefs_badges), jsonResp.getInt("badges"));
-						try {
-							editor.putBoolean(ctx.getString(R.string.prefs_scoring_enabled), jsonResp.getBoolean("scoring"));
-							editor.putBoolean(ctx.getString(R.string.prefs_badging_enabled), jsonResp.getBoolean("badging"));
-						} catch (JSONException e) {
-							e.printStackTrace();
-						}
-						editor.commit();
+		                // make request
+						HttpResponse response = client.execute(httpPatch);	
 						
-						try {
-							JSONObject metadata = jsonResp.getJSONObject("metadata");
-					        MetaDataUtils mu = new MetaDataUtils(ctx);
-					        mu.saveMetaData(metadata, prefs);
-						} catch (JSONException e) {
-							e.printStackTrace();
+						InputStream content = response.getEntity().getContent();
+						BufferedReader buffer = new BufferedReader(new InputStreamReader(content), 4096);
+						String responseStr = "";
+						String s = "";
+		
+						while ((s = buffer.readLine()) != null) {
+							responseStr += s;
 						}
-				    	
-						break;
-					case 400: // submitted but invalid digest - returned 400 Bad Request - so record as submitted so doesn't keep trying
-						DbHelper dbh2 = new DbHelper(ctx);
-						for(TrackerLog tl: trackerBatch){
-							dbh2.markLogSubmitted(tl.getId());
-						};
-						dbh2.close();
-						payload.setResult(true);
-						break;
-					default:
+						Log.d(TAG,responseStr);
+						switch (response.getStatusLine().getStatusCode()){
+							case 200: // submitted
+								for(TrackerLog tl: trackerBatch){
+									DbHelper db2 = new DbHelper(ctx);
+									db2.markLogSubmitted(tl.getId());
+									DatabaseManager.getInstance().closeDatabase();
+								}
+								payload.setResult(true);
+								// update points
+								JSONObject jsonResp = new JSONObject(responseStr);
+								Editor editor = prefs.edit();
+								
+								editor.putInt("prefPoints", jsonResp.getInt("points"));
+								editor.putInt("prefBadges", jsonResp.getInt("badges"));
+								try {
+									editor.putBoolean("prefScoringEnabled", jsonResp.getBoolean("scoring"));
+									editor.putBoolean("prefBadgingEnabled", jsonResp.getBoolean("badging"));
+								} catch (JSONException e) {
+									e.printStackTrace();
+								}
+								editor.commit();
+								
+								try {
+									JSONObject metadata = jsonResp.getJSONObject("metadata");
+							        MetaDataUtils mu = new MetaDataUtils(ctx);
+							        mu.saveMetaData(metadata, prefs);
+								} catch (JSONException e) {
+									e.printStackTrace();
+								}
+						    	
+								break;
+							case 400: // submitted but invalid digest - returned 400 Bad Request - so record as submitted so doesn't keep trying
+								for(TrackerLog tl: trackerBatch){
+									DbHelper db3 = new DbHelper(ctx);
+									db3.markLogSubmitted(tl.getId());
+									DatabaseManager.getInstance().closeDatabase();
+								};
+								payload.setResult(true);
+								break;
+							default:
+								payload.setResult(false);
+						}
+		
+					} catch (UnsupportedEncodingException e) {
 						payload.setResult(false);
+					} catch (ClientProtocolException e) {
+						payload.setResult(false);
+					} catch (IOException e) {
+						payload.setResult(false);
+					} catch (JSONException e) {
+						if(!MobileLearning.DEVELOPER_MODE){
+							BugSenseHandler.sendException(e);
+						} else {
+							e.printStackTrace();
+						}
+						payload.setResult(false);
+					} 
 				}
-
-			} catch (UnsupportedEncodingException e) {
-				payload.setResult(false);
-			} catch (ClientProtocolException e) {
-				payload.setResult(false);
-			} catch (IOException e) {
-				payload.setResult(false);
-			} catch (JSONException e) {
-				if(!MobileLearning.DEVELOPER_MODE){
-					BugSenseHandler.sendException(e);
-				} else {
-					e.printStackTrace();
-				}
-				payload.setResult(false);
-			}
-		}
-		
+			
+	
+		} catch (IllegalStateException ise) {
+			ise.printStackTrace();
+			payload.setResult(false);
+		} 
 		return payload;
 	}
 

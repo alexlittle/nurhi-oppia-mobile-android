@@ -53,7 +53,7 @@ public class CourseIndexActivity extends AppActivity implements OnSharedPreferen
 	public static final String TAG = CourseIndexActivity.class.getSimpleName();
 
 	private Course course;
-	private CourseXMLReader mxr;
+	private CourseXMLReader cxr;
 	private ArrayList<Section> sections;
 	private SharedPreferences prefs;
 	private Activity baselineActivity;
@@ -73,16 +73,16 @@ public class CourseIndexActivity extends AppActivity implements OnSharedPreferen
 		if (bundle != null) {
 			course = (Course) bundle.getSerializable(Course.TAG);
 			try {
-				mxr = new CourseXMLReader(course.getCourseXMLLocation());
+				cxr = new CourseXMLReader(course.getCourseXMLLocation(), CourseIndexActivity.this);
 
-				course.setMetaPages(mxr.getMetaPages());
+				course.setMetaPages(cxr.getMetaPages());
 
 				boolean baselineCompleted = this.isBaselineCompleted();
 
 				String digest = (String) bundle.getSerializable("JumpTo");
 				if (digest != null && baselineCompleted) {
 					// code to directly jump to a specific activity
-					sections = mxr.getSections(course.getModId(), CourseIndexActivity.this);
+					sections = cxr.getSections(course.getCourseId());
 					for (Section s : sections) {
 						for (int i = 0; i < s.getActivities().size(); i++) {
 							Activity a = s.getActivities().get(i);
@@ -114,9 +114,9 @@ public class CourseIndexActivity extends AppActivity implements OnSharedPreferen
 	@Override
 	public void onStart() {
 		super.onStart();
-		sections = mxr.getSections(course.getModId(), CourseIndexActivity.this);
+		sections = cxr.getSections(course.getCourseId());
 		setTitle(course
-				.getTitle(prefs.getString(getString(R.string.prefs_language), Locale.getDefault().getLanguage())));
+				.getTitle(prefs.getString("prefLanguage", Locale.getDefault().getLanguage())));
 
 		// set image
 		if (course.getImageFile() != null) {
@@ -176,7 +176,7 @@ public class CourseIndexActivity extends AppActivity implements OnSharedPreferen
 		int order = 104;
 		for (CourseMetaPage mmp : ammp) {
 			String title = mmp.getLang(
-					prefs.getString(getString(R.string.prefs_language), Locale.getDefault().getLanguage()))
+					prefs.getString("prefLanguage", Locale.getDefault().getLanguage()))
 					.getContent();
 			menu.add(0, mmp.getId(), order, title).setIcon(android.R.drawable.ic_menu_info_details);
 			order++;
@@ -195,7 +195,10 @@ public class CourseIndexActivity extends AppActivity implements OnSharedPreferen
 			createLanguageDialog();
 			return true;
 		case R.id.menu_help:
-			startActivity(new Intent(this, HelpActivity.class));
+			i = new Intent(this, AboutActivity.class);
+			tb.putSerializable(AboutActivity.TAB_ACTIVE, AboutActivity.TAB_HELP);
+			i.putExtras(tb);
+			startActivity(i);
 			return true;
 		case android.R.id.home:
 			this.finish();
@@ -221,7 +224,7 @@ public class CourseIndexActivity extends AppActivity implements OnSharedPreferen
 	}
 
 	private boolean isBaselineCompleted() {
-		ArrayList<Activity> baselineActs = mxr.getBaselineActivities(course.getModId(), this);
+		ArrayList<Activity> baselineActs = cxr.getBaselineActivities(course.getCourseId());
 		// TODO how to handle if more than one baseline activity
 		for (Activity a : baselineActs) {
 			if (!a.isAttempted()) {
@@ -260,8 +263,8 @@ public class CourseIndexActivity extends AppActivity implements OnSharedPreferen
 	}
 
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-		if (key.equalsIgnoreCase(getString(R.string.prefs_points))
-				|| key.equalsIgnoreCase(getString(R.string.prefs_badges))) {
+		if (key.equalsIgnoreCase("prefPoints")
+				|| key.equalsIgnoreCase("prefBadges")) {
 			supportInvalidateOptionsMenu();
 		}
 
