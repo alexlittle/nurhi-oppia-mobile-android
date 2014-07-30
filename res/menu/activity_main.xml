@@ -22,20 +22,9 @@
         android:icon="@drawable/ic_menu_start_conversation"
         android:title="@string/menu_language"/>
     <item
-        android:id="@+id/menu_scorecard"
-        android:icon="@drawable/ic_menu_start_conversation"
-        android:title="@string/menu_scorecard"/>
-    <item
-        android:id="@+id/menu_monitor"
-        android:title="@string/menu_monitor"/>
-    <item
         android:id="@+id/menu_about"
         android:icon="@android:drawable/ic_menu_info_details"
         android:title="@string/menu_about"/>
-    <item
-        android:id="@+id/menu_help"
-        android:icon="@android:drawable/ic_menu_help"
-        android:title="@string/menu_help"/>
     <item
         android:id="@+id/menu_logout"
         android:icon="@drawable/ic_action_logout"

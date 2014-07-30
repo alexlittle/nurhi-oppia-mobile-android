@@ -52,8 +52,6 @@ import android.widget.LinearLayout.LayoutParams;
 public class RegisterFragment extends Fragment implements SubmitListener {
 
 	public static final String TAG = RegisterFragment.class.getSimpleName();
-	private static final int ONCLICK_TASK_NULL = 0;
-	private static final int ONCLICK_TASK_REGISTERED = 10;
 	
 	private SharedPreferences prefs;
 	private EditText usernameField;
