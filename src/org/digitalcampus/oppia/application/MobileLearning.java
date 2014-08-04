@@ -38,7 +38,7 @@ public class MobileLearning extends Application {
 	
 	// local storage vars
 	public static final String OPPIAMOBILE_ROOT = Environment
-			.getExternalStorageDirectory() + "/digitalcampus/";
+			.getExternalStorageDirectory() + "/nurhi/";
 	public static final String COURSES_PATH = OPPIAMOBILE_ROOT + "modules/";
 	public static final String MEDIA_PATH = OPPIAMOBILE_ROOT + "media/";
 	public static final String DOWNLOAD_PATH = OPPIAMOBILE_ROOT + "download/";

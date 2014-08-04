@@ -117,6 +117,16 @@ public class UpgradeManagerTask extends AsyncTask<Payload, String, Payload> {
 			}
 		}
 		
+		if(!prefs.getBoolean("upgradeV31",false)){
+			if(upgradeV31(Environment.getExternalStorageDirectory() + "/digitalcampus/media/")){
+		        Editor editor = prefs.edit();
+		        editor.putBoolean("upgradeV31", true);
+		        editor.commit();
+		        publishProgress("Upgraded to v31");
+		        payload.setResult(true);
+			}
+		}
+		
 		return payload;
 	}
 	
@@ -235,6 +245,51 @@ public class UpgradeManagerTask extends AsyncTask<Payload, String, Payload> {
 		return FileUtils.deleteDir(dir);
 	}
 
+	/*
+	 * Move video files from previous location to new one
+	 */
+	private boolean upgradeV31(String previousMediaDirectory){
+		String cardstatus = Environment.getExternalStorageState();
+		if (cardstatus.equals(Environment.MEDIA_REMOVED)
+				|| cardstatus.equals(Environment.MEDIA_UNMOUNTABLE)
+				|| cardstatus.equals(Environment.MEDIA_UNMOUNTED)
+				|| cardstatus.equals(Environment.MEDIA_MOUNTED_READ_ONLY)
+				|| cardstatus.equals(Environment.MEDIA_SHARED)) {
+			return false;
+		}
+		
+		// Check whether the directory all ready exists
+		File dir = new File(previousMediaDirectory);
+		if(!dir.exists()){
+			return true;
+		}
+		if (!dir.isDirectory()) {
+			return true;
+		}
+		
+		// copy all the files over to the new directory
+		String[] directory = dir.list();
+		try {
+			for (int index = 0; index < directory.length; index++) {
+				FileOutputStream f = new FileOutputStream(new File(MobileLearning.MEDIA_PATH, directory[index].toString()));
+				InputStream is = new FileInputStream(previousMediaDirectory + directory[index].toString());
+						
+				byte[] buffer = new byte[1024];
+				int len = 0;
+				while ((len = is.read(buffer)) > 0) {
+					f.write(buffer, 0, len);
+				}
+				f.close();
+				is.close();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}   
+		
+		// delete the old directory
+		return FileUtils.deleteDir(dir);
+	}
 	/* go through and add html content to tables
 	 */
 	protected void upgradeV43(){
