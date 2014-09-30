@@ -55,7 +55,7 @@ import android.util.Log;
 
 import com.bugsense.trace.BugSenseHandler;
 
-public class TrackerService extends Service implements APIRequestListener{
+public class TrackerService extends Service implements APIRequestListener {
 
 	public static final String TAG = TrackerService.class.getSimpleName();
 
@@ -201,5 +201,6 @@ public class TrackerService extends Service implements APIRequestListener{
 			notificationManager.notify(mId, notification);
 		}
 	}
+
 
 }

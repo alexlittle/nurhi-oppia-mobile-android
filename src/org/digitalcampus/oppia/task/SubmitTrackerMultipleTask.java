@@ -35,6 +35,7 @@ import org.apache.http.protocol.HTTP;
 import org.digitalcampus.oppia.application.DatabaseManager;
 import org.digitalcampus.oppia.application.DbHelper;
 import org.digitalcampus.oppia.application.MobileLearning;
+import org.digitalcampus.oppia.listener.TrackerServiceListener;
 import org.digitalcampus.oppia.model.TrackerLog;
 import org.digitalcampus.oppia.utils.HTTPConnectionUtils;
 import org.digitalcampus.oppia.utils.MetaDataUtils;
@@ -51,12 +52,13 @@ import android.util.Log;
 
 import com.bugsense.trace.BugSenseHandler;
 
-public class SubmitTrackerMultipleTask extends AsyncTask<Payload, Object, Payload> {
+public class SubmitTrackerMultipleTask extends AsyncTask<Payload, Integer, Payload> {
 
 	public final static String TAG = SubmitTrackerMultipleTask.class.getSimpleName();
 
 	private Context ctx;
 	private SharedPreferences prefs;
+	private TrackerServiceListener trackerServiceListener;
 
 	public SubmitTrackerMultipleTask(Context ctx) {
 		this.ctx = ctx;
@@ -77,17 +79,17 @@ public class SubmitTrackerMultipleTask extends AsyncTask<Payload, Object, Payloa
 				@SuppressWarnings("unchecked")
 				Collection<Collection<TrackerLog>> result = (Collection<Collection<TrackerLog>>) split((Collection<Object>) payload.getData(), MobileLearning.MAX_TRACKER_SUBMIT);
 				
-				HTTPConnectionUtils client = new HTTPConnectionUtils(ctx);
 				
-				String url =client.getFullURL(MobileLearning.TRACKER_PATH);
-				
-				HttpPatch httpPatch = new HttpPatch(url);
 				
 				for (Collection<TrackerLog> trackerBatch : result) {
 					String dataToSend = createDataString(trackerBatch);
 					
 					try {
 		
+						HTTPConnectionUtils client = new HTTPConnectionUtils(ctx);
+						String url = client.getFullURL(MobileLearning.TRACKER_PATH);
+						HttpPatch httpPatch = new HttpPatch(url);
+						
 						StringEntity se = new StringEntity(dataToSend,"utf8");
 		                se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
 		                httpPatch.setEntity(se);
@@ -163,6 +165,7 @@ public class SubmitTrackerMultipleTask extends AsyncTask<Payload, Object, Payloa
 						}
 						payload.setResult(false);
 					} 
+					publishProgress(0);
 				}
 			
 	
@@ -173,15 +176,30 @@ public class SubmitTrackerMultipleTask extends AsyncTask<Payload, Object, Payloa
 		return payload;
 	}
 
-	protected void onProgressUpdate(String... obj) {
-		// do nothing
+	@Override
+	protected void onProgressUpdate(Integer... obj) {
+		synchronized (this) {
+            if (trackerServiceListener != null) {
+            	trackerServiceListener.trackerProgressUpdate();
+            }
+        }
 	}
 	
 	@Override
     protected void onPostExecute(Payload p) {
+		synchronized (this) {
+            if (trackerServiceListener != null) {
+            	trackerServiceListener.trackerComplete();
+            }
+        }
 		// reset submittask back to null after completion - so next call can run properly
 		MobileLearning app = (MobileLearning) ctx.getApplicationContext();
 		app.omSubmitTrackerMultipleTask = null;
+		
+    }
+	
+	public void setTrackerServiceListener(TrackerServiceListener tsl) {
+        trackerServiceListener = tsl;
     }
 	
 	private static Collection<Collection<TrackerLog>> split(Collection<Object> bigCollection, int maxBatchSize) {

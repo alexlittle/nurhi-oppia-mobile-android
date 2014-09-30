@@ -18,6 +18,7 @@
 package org.digitalcampus.oppia.widgets;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -32,11 +33,13 @@ import org.digitalcampus.mobile.quiz.model.questiontypes.MultiSelect;
 import org.digitalcampus.mobile.quiz.model.questiontypes.Numerical;
 import org.digitalcampus.mobile.quiz.model.questiontypes.ShortAnswer;
 import org.digitalcampus.oppia.activity.CourseActivity;
+import org.digitalcampus.oppia.adapter.QuizFeedbackAdapter;
 import org.digitalcampus.oppia.application.DatabaseManager;
 import org.digitalcampus.oppia.application.DbHelper;
 import org.digitalcampus.oppia.application.Tracker;
 import org.digitalcampus.oppia.model.Activity;
 import org.digitalcampus.oppia.model.Course;
+import org.digitalcampus.oppia.model.QuizFeedback;
 import org.digitalcampus.oppia.utils.MetaDataUtils;
 import org.digitalcampus.oppia.widgets.quiz.DescriptionWidget;
 import org.digitalcampus.oppia.widgets.quiz.MatchingWidget;
@@ -70,6 +73,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -143,7 +147,7 @@ public class QuizWidget extends WidgetFactory {
 		super.onResume();
 		if (this.quiz == null) {
 			this.quiz = new Quiz();
-			this.quiz.load(quizContent);
+			this.quiz.load(quizContent,prefs.getString("prefLanguage", Locale.getDefault().getLanguage()));
 		}
 		if (this.isOnResultsPage) {
 			this.showResults();
@@ -201,7 +205,7 @@ public class QuizWidget extends WidgetFactory {
 		}
 		qText.setVisibility(View.VISIBLE);
 		// convert in case has any html special chars
-		qText.setText(Html.fromHtml(q.getTitle()).toString());
+		qText.setText(Html.fromHtml(q.getTitle(prefs.getString("prefLanguage", Locale.getDefault().getLanguage()))).toString());
 
 		if (q.getProp("image") == null) {
 			questionImage.setVisibility(View.GONE);
@@ -265,7 +269,7 @@ public class QuizWidget extends WidgetFactory {
 				if (saveAnswer()) {
 					String feedback = "";
 					try {
-						feedback = QuizWidget.this.quiz.getCurrentQuestion().getFeedback();
+						feedback = QuizWidget.this.quiz.getCurrentQuestion().getFeedback(prefs.getString("prefLanguage", Locale.getDefault().getLanguage()));
 					
 						if (!feedback.equals("") && 
 								quiz.getShowFeedback() == Quiz.SHOW_FEEDBACK_ALWAYS 
@@ -388,6 +392,70 @@ public class QuizWidget extends WidgetFactory {
 			baselineExtro.setVisibility(View.VISIBLE);
 			baselineExtro.setText(super.getActivity().getString(R.string.widget_quiz_baseline_completed));
 		} 
+
+		
+		// TODO add TextView here to give overall feedback if it's in the quiz
+		
+		// Show the detail of which questions were right/wrong
+		if (quiz.getShowFeedback() == Quiz.SHOW_FEEDBACK_ALWAYS || quiz.getShowFeedback() == Quiz.SHOW_FEEDBACK_ATEND){
+			ListView questionFeedbackLV = (ListView) getView().findViewById(R.id.quiz_results_feedback);
+			ArrayList<QuizFeedback> quizFeedback = new ArrayList<QuizFeedback>();
+			List<QuizQuestion> questions = this.quiz.getQuestions();
+			for(QuizQuestion q: questions){
+				if(!(q instanceof Description)){
+					QuizFeedback qf = new QuizFeedback();
+					qf.setScore(q.getScoreAsPercent());
+					qf.setQuestionText(q.getTitle(prefs.getString("prefLanguage", Locale.getDefault().getLanguage())));
+					qf.setUserResponse(q.getUserResponses());
+					qf.setFeedbackText(q.getFeedback(prefs.getString("prefLanguage", Locale.getDefault().getLanguage())));
+					quizFeedback.add(qf);
+				}
+			}
+			QuizFeedbackAdapter qfa = new QuizFeedbackAdapter(super.getActivity(), quizFeedback);
+			questionFeedbackLV.setAdapter(qfa);
+		}
+		
+		// Show restart or continue button
+		Button restartBtn = (Button) getView().findViewById(R.id.quiz_results_button);
+		
+		if (this.isBaseline) {
+			restartBtn.setText(super.getActivity().getString(R.string.widget_quiz_baseline_goto_course));
+			restartBtn.setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					QuizWidget.this.getActivity().finish();
+				}
+			});
+		} else {
+			restartBtn.setText(super.getActivity().getString(R.string.widget_quiz_results_restart));
+			restartBtn.setOnClickListener(new View.OnClickListener() {
+				public void onClick(View v) {
+					QuizWidget.this.restart();
+				}
+			});
+		}
+	}
+
+	private void restart() {
+		this.setStartTime(System.currentTimeMillis() / 1000);
+		
+		this.quiz = new Quiz();
+		this.quiz.load(quizContent,prefs.getString("prefLanguage", Locale.getDefault().getLanguage()));
+		this.isOnResultsPage = false;
+		
+		// reload quiz layout
+		View C = getView().findViewById(R.id.widget_quiz_results);
+	    ViewGroup parent = (ViewGroup) C.getParent();
+	    int index = parent.indexOfChild(C);
+	    parent.removeView(C);
+	    C = super.getActivity().getLayoutInflater().inflate(R.layout.widget_quiz, parent, false);
+	    parent.addView(C, index);
+	    
+	    this.prevBtn = (Button) getView().findViewById(R.id.mquiz_prev_btn);
+	    this.nextBtn = (Button) getView().findViewById(R.id.mquiz_next_btn);
+	    this.qText = (TextView) getView().findViewById(R.id.question_text);
+	    this.questionImage = (LinearLayout) getView().findViewById(R.id.question_image);
+	    this.questionImage.setVisibility(View.GONE);
+		this.showQuestion();
 	}
 
 	@Override
@@ -465,7 +533,7 @@ public class QuizWidget extends WidgetFactory {
 		// Get the current question text
 		String toRead = "";
 		try {
-			toRead = quiz.getCurrentQuestion().getTitle();
+			toRead = quiz.getCurrentQuestion().getTitle(prefs.getString("prefLanguage", Locale.getDefault().getLanguage()));
 		} catch (InvalidQuizException e) {
 			e.printStackTrace();
 		}
@@ -473,17 +541,10 @@ public class QuizWidget extends WidgetFactory {
 	}
 
 	private float getPercent() {
-		quiz.mark();
+		quiz.mark(prefs.getString("prefLanguage", Locale.getDefault().getLanguage()));
 		float percent = quiz.getUserscore() * 100 / quiz.getMaxscore();
 		return percent;
 	}
-	
-	// TODO
-	/*private String getOverallFeedback(){
-		String feedback = "";
-		
-		return feedback;
-	}*/
 	
 	private class OnImageClickListener implements OnClickListener{
 
