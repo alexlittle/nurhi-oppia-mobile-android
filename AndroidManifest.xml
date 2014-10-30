@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.nurhi.oppia"
-    android:versionCode="7"
-    android:versionName="1.1.2" >
+    android:versionCode="8"
+    android:versionName="1.1.8" >
 
 
     <uses-sdk
@@ -91,6 +91,11 @@
          <activity
             android:name="org.digitalcampus.oppia.activity.AppActivity"
             android:label="@string/app_name" />
+         <activity
+            android:name="org.digitalcampus.oppia.utils.mediaplayer.VideoPlayerActivity"
+            android:label="@string/media_player_description"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
         <service
             android:name="org.digitalcampus.oppia.service.TrackerService"
             android:icon="@drawable/nurhi_logo"

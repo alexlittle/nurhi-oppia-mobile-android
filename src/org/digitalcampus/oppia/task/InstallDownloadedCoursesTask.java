@@ -68,13 +68,19 @@ public class InstallDownloadedCoursesTask extends AsyncTask<Payload, DownloadPro
 				// extract to temp dir and check it's a valid package file
 				File tempdir = new File(MobileLearning.OPPIAMOBILE_ROOT + "temp/");
 				tempdir.mkdirs();
+				
+				File testDir = new File(MobileLearning.DOWNLOAD_PATH, children[i]);
+				
+				if (testDir.isDirectory()){
+					continue;
+				}
 				boolean unzipResult = FileUtils.unzipFiles(MobileLearning.DOWNLOAD_PATH, children[i], tempdir.getAbsolutePath());
 				
 				if (!unzipResult){
 					//then was invalid zip file and should be removed
 					Log.d(TAG,"73: invalid zip file - flagged for removal");
 					FileUtils.cleanUp(tempdir, MobileLearning.DOWNLOAD_PATH + children[i]);
-					break;
+					continue;
 				}
 				String[] courseDirs = tempdir.list(); // use this to get the course
 													// name
@@ -90,7 +96,7 @@ public class InstallDownloadedCoursesTask extends AsyncTask<Payload, DownloadPro
 				} catch (ArrayIndexOutOfBoundsException aioobe){
 					Log.d(TAG,"89: invalid zip file - flagged for removal");
 					FileUtils.cleanUp(tempdir, MobileLearning.DOWNLOAD_PATH + children[i]);
-					break;
+					continue;
 				}
 				
 				// check a module.xml file exists and is a readable XML file
