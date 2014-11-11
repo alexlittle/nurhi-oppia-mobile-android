@@ -100,8 +100,8 @@
             android:layout_height="wrap_content"
             android:text="@string/register_form_currently_working_facility_title" />
 
-        <Spinner
-            android:id="@+id/currently_working_facility_spinner"
+        <EditText
+            android:id="@+id/currently_working_facility_field"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content" />
 

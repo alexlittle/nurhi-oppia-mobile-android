@@ -105,6 +105,8 @@ public class RegisterTask extends AsyncTask<Payload, Object, Payload> {
 				responseStr += s;
 			}
 
+			Log.d(TAG,response.getStatusLine().getStatusCode() + ": " + responseStr);
+			
 			switch (response.getStatusLine().getStatusCode()){
 				case 400: // unauthorised
 					payload.setResult(false);

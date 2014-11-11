@@ -62,7 +62,7 @@ public class RegisterFragment extends Fragment implements SubmitListener {
 	private EditText lastnameField;
 	
 	private EditText phonenoField; 
-	private Spinner currentlyWorkingFacilityField;
+	private EditText currentlyWorkingFacilityField;
 	private EditText nurhiTrainingField;
 	private Spinner staffTypeField;
 	
@@ -111,13 +111,7 @@ public class RegisterFragment extends Fragment implements SubmitListener {
 
 		phonenoField = (EditText) super.getActivity().findViewById(R.id.register_form_phone_no_field);
 		
-		currentlyWorkingFacilityField = (Spinner) super.getActivity().findViewById(R.id.currently_working_facility_spinner);
-		ArrayAdapter<CharSequence> cwfadapter = ArrayAdapter.createFromResource(super.getActivity(),
-		        R.array.registerFormCurrentlyWorkingFacility, android.R.layout.simple_spinner_item);
-		// Specify the layout to use when the list of choices appears
-		cwfadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		// Apply the adapter to the spinner
-		currentlyWorkingFacilityField.setAdapter(cwfadapter);
+		currentlyWorkingFacilityField = (EditText) super.getActivity().findViewById(R.id.currently_working_facility_field);
 		
 		nurhiTrainingField = (EditText) super.getActivity().findViewById(R.id.register_form_nurhi_training_field);
 		
@@ -251,7 +245,7 @@ public class RegisterFragment extends Fragment implements SubmitListener {
 
 		//extra data for NURHI		
 		String phoneNo = (String) phonenoField.getText().toString(); 
-		String currentWorkingFacility = currentlyWorkingFacilityField.getSelectedItem().toString();
+		String currentWorkingFacility = currentlyWorkingFacilityField.getText().toString();
 		String nurhiTraining = (String) nurhiTrainingField.getText().toString(); 
 		String staffType = staffTypeField.getSelectedItem().toString();
 		String fpMethods = "";
@@ -301,44 +295,6 @@ public class RegisterFragment extends Fragment implements SubmitListener {
 		// check lastname
 		if (lastname.length() < 2) {
 			UIUtils.showAlert(super.getActivity(),getString(R.string.error), "Please enter your lastname");
-			return;
-		}
-
-		// check NURHI extra data
-		if(phoneNo.length()<6){
-			UIUtils.showAlert(super.getActivity(),getString(R.string.error), "Please enter your phone number");
-			return;
-		}
-		if(currentWorkingFacility.length() == 0){
-			UIUtils.showAlert(super.getActivity(),getString(R.string.error), "Please enter your current working facility");
-			return;
-		}
-		if(nurhiTraining.length() == 0){
-			UIUtils.showAlert(super.getActivity(),getString(R.string.error), "Please enter your the number of NURHI sponsored training you have attended");
-			return;
-		}
-		if(staffType.length() == 0){
-			UIUtils.showAlert(super.getActivity(),getString(R.string.error), "Please enter your staff type");
-			return;
-		}
-		if(fpMethods.length() == 0){
-			UIUtils.showAlert(super.getActivity(),getString(R.string.error), "Please enter the family planning methods your facility provides.");
-			return;
-		}
-		if(educationLevel.length() == 0){
-			UIUtils.showAlert(super.getActivity(),getString(R.string.error), "Please enter your education level.");
-			return;
-		}
-		if(religion.length() == 0){
-			UIUtils.showAlert(super.getActivity(),getString(R.string.error), "Please enter your religion.");
-			return;
-		}
-		if(sex.length() == 0){
-			UIUtils.showAlert(super.getActivity(),getString(R.string.error), "Please enter your sex.");
-			return;
-		}
-		if(age.length() == 0){
-			UIUtils.showAlert(super.getActivity(),getString(R.string.error), "Please enter your age.");
 			return;
 		}
 		
