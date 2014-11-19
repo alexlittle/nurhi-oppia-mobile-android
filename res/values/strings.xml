@@ -115,12 +115,12 @@
 	<string name="login_password_title">Password</string>
 	<string name="title_register">Register</string>
 	
-	<string name="register_form_username_title">Username</string>
-	<string name="register_form_email_title">Email address</string>
-	<string name="register_form_firstname_title">First name</string>
-	<string name="register_form_lastname_title">Last name</string>
-	<string name="register_form_password_title">Password</string>
-	<string name="register_form_password_again_title">Password (again)</string>
+	<string name="register_form_username_title">Username (required)</string>
+	<string name="register_form_email_title">Email address (required)</string>
+	<string name="register_form_firstname_title">First name (required)</string>
+	<string name="register_form_lastname_title">Last name (required)</string>
+	<string name="register_form_password_title">Password (required)</string>
+	<string name="register_form_password_again_title">Password (again) (required)</string>
 	<string name="register_form_phone_no_title">Your phone number</string>
 	<string name="register_form_currently_working_facility_title">Please select the facility where you currently work</string>
 	<string name="register_form_nurhi_training_title">How many times have you attended NURHI sponsored training?</string>
