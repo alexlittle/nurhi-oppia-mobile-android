@@ -84,3 +84,9 @@ a {
 	font-size: 80%;
 	margin: 3px 0 10px 0;
 }
+
+img {
+	display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
