@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.nurhi.oppia"
-    android:versionCode="8"
-    android:versionName="1.1.8" >
+    android:versionCode="49"
+    android:versionName="5.0.0" >
 
 
     <uses-sdk

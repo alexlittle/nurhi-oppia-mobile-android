@@ -127,13 +127,15 @@ public class UpgradeManagerTask extends AsyncTask<Payload, String, Payload> {
 		        payload.setResult(true);
 			}
 		}
-		if(!prefs.getBoolean("upgradeV46",false)){
+		
+		if(!prefs.getBoolean("upgradeV49b",false)){
 			Editor editor = prefs.edit();
-			editor.putBoolean("upgradeV46", true);
+			editor.putBoolean("upgradeV49b", true);
 			editor.commit();
-			publishProgress(this.ctx.getString(R.string.info_upgrading,"v46"));
+			publishProgress(this.ctx.getString(R.string.info_upgrading,"v49b"));
 			payload.setResult(true);
 		}
+	
 		
 		return payload;
 	}
@@ -299,6 +301,8 @@ public class UpgradeManagerTask extends AsyncTask<Payload, String, Payload> {
 		// delete the old directory
 		return FileUtils.deleteDir(dir);
 	}
+	
+	
 	/* go through and add html content to tables
 	 */
 	protected void upgradeV43(){
