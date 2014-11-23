@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     
-    <string name="prefServerDefault">http://oppia.dreamhosters.com/</string>
+    <string name="prefServerDefault">http://nurhi.oppia-mobile.org/</string>
     <string name="prefServerTimeoutConnectionDefault">60000</string>
     <string name="prefServerTimeoutResponseDefault">60000</string>
 

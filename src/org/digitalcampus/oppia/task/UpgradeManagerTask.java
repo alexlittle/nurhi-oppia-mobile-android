@@ -23,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.digitalcampus.oppia.activity.PrefsActivity;
 import org.digitalcampus.oppia.application.DatabaseManager;
 import org.digitalcampus.oppia.application.DbHelper;
 import org.digitalcampus.oppia.application.MobileLearning;
@@ -128,11 +129,12 @@ public class UpgradeManagerTask extends AsyncTask<Payload, String, Payload> {
 			}
 		}
 		
-		if(!prefs.getBoolean("upgradeV49b",false)){
+		if(!prefs.getBoolean("upgradeV49c",false)){
 			Editor editor = prefs.edit();
-			editor.putBoolean("upgradeV49b", true);
+			editor.putBoolean("upgradeV49c", true);
+			editor.putString("prefServer","http://nurhi.oppia-mobile.org/");
 			editor.commit();
-			publishProgress(this.ctx.getString(R.string.info_upgrading,"v49b"));
+			publishProgress(this.ctx.getString(R.string.info_upgrading,"v49c"));
 			payload.setResult(true);
 		}
 	
