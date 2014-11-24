@@ -129,12 +129,12 @@ public class UpgradeManagerTask extends AsyncTask<Payload, String, Payload> {
 			}
 		}
 		
-		if(!prefs.getBoolean("upgradeV49d",false)){
+		if(!prefs.getBoolean("upgradeV49e",false)){
 			Editor editor = prefs.edit();
-			editor.putBoolean("upgradeV49d", true);
+			editor.putBoolean("upgradeV49e", true);
 			editor.putString("prefServer","http://nurhi.oppia-mobile.org/");
 			editor.commit();
-			publishProgress(this.ctx.getString(R.string.info_upgrading,"v49d"));
+			publishProgress(this.ctx.getString(R.string.info_upgrading,"v49e"));
 			payload.setResult(true);
 		}
 	
